@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   prepare_build:
     runs-on: ubuntu-22.04
