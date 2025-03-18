@@ -42,7 +42,7 @@ fun App() {
                 scope.launch {
                     loading = true
                     try {
-                        val response: String = httpClient.get("http://localhost:8080/hello") {
+                        val response: String = httpClient.get("http://10.0.2.2:8080/hello") {
                             accept(ContentType.Text.Plain)
                         }.body() // Ensure we extract the response body correctly
                         dialogMessage = response
