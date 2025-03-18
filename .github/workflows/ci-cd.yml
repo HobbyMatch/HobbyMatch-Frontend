@@ -66,25 +66,27 @@ jobs:
 #        run: ./gradlew test
       # No signing or deployment step
 
-  build_ios:
-    needs: [prepare_build]
-    runs-on: macos-12
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-      - name: "Setup Gradle"
-        uses: gradle/gradle-build-action@v2
-      - name: "Build xcworkspace"
-        run: ./gradlew podInstall
-      - name: "Setup app version"
-        uses: yanamura/ios-bump-version@v1
-        with:
-          version: ${{ env.hobby_match_version_name }}
-          build-number: ${{ env.hobby_match_version_code }}
-          project-path: iosApp
-      - name: "Build iOS App"
-        run: xcodebuild -workspace iosApp/iosApp.xcworkspace -scheme iosApp -sdk iphoneos -configuration Release
+# For now we don't need build for iOS
+
+#  build_ios:
+#    needs: [prepare_build]
+#    runs-on: macos-12
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: actions/setup-java@v3
+#        with:
+#          distribution: 'zulu'
+#          java-version: '17'
+#      - name: "Setup Gradle"
+#        uses: gradle/gradle-build-action@v2
+#      - name: "Build xcworkspace"
+#        run: ./gradlew podInstall
+#      - name: "Setup app version"
+#        uses: yanamura/ios-bump-version@v1
+#        with:
+#          version: ${{ env.hobby_match_version_name }}
+#          build-number: ${{ env.hobby_match_version_code }}
+#          project-path: iosApp
+#      - name: "Build iOS App"
+#        run: xcodebuild -workspace iosApp/iosApp.xcworkspace -scheme iosApp -sdk iphoneos -configuration Release
       # No signing or deployment step
