@@ -19,7 +19,7 @@ navigation-compose = "2.8.0-alpha10"
 kotlinxSerializationCore = "1.7.1"
 voyager = "1.1.0-beta03"
 koin = "4.0.3"
-realm = "2.3.0"
+realm = "2.1.0"
 coroutines = "1.8.1"
 stately = "2.1.0"
 
