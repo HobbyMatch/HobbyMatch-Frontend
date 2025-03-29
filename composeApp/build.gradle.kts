@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -6,12 +5,12 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    kotlin("plugin.serialization") version "2.1.0"
+    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.realm.plugin)
 }
 
 kotlin {
     androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
@@ -34,7 +33,7 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
 
-            //ktor
+            // ktor - Network connectivity - Android
             implementation(libs.ktor.client.android)
         }
         commonMain.dependencies {
@@ -67,9 +66,18 @@ kotlin {
 
             // koin - Dependency Injection
             implementation(libs.koin.core)
+
+            // Stately Common - state management
+            implementation(libs.stately.common)
+
+            // Realm - Local NoSQL Database
+            implementation(libs.mongodb.realm)
+
+            // Coroutines - kotlinx.coroutines library for non-blocking asynchronous computations
+            implementation(libs.kotlin.coroutines)
         }
         iosMain.dependencies {
-            // ktor
+            // ktor - Network connectivity - iOS
             implementation(libs.ktor.client.darwin)
         }
     }
