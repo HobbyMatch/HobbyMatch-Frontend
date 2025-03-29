@@ -1,4 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -7,6 +6,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    kotlin("plugin.serialization") version "2.1.0"
 }
 
 kotlin {
@@ -40,19 +40,36 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(compose.material)
+            implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
 
-            // ktor
+            // ktor - Network connectivity
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.client.content.negotiation)
+
+            // Compose navigation (probably not gonna use that)
+            implementation(libs.androidx.compose.navigation)
+
+            // kotlinx serialization
+            implementation(libs.kotlinx.serialization.core)
+            implementation(libs.kotlinx.serialization.json)
+
+            // Voyager navigation
+            implementation(libs.navigator)
+            implementation(libs.navigator.koin)
+            implementation(libs.navigator.screen.model)
+            implementation(libs.navigator.transitions)
+
+            // koin - Dependency Injection
+            implementation(libs.koin.core)
         }
         iosMain.dependencies {
+            // ktor
             implementation(libs.ktor.client.darwin)
         }
     }
