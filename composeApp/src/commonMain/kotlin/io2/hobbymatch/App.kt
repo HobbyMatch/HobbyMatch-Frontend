@@ -1,80 +1,47 @@
 package io2.hobbymatch
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.transitions.SlideTransition
+import io2.hobbymatch.login.presentation.LoginScreen
+import io2.hobbymatch.login.presentation.LoginViewModel
+import io2.hobbymatch.ui.theme.darkScheme
+import io2.hobbymatch.ui.theme.lightScheme
+import io2.hobbymatch.user.data.local.realm.MongoDB
+import io2.hobbymatch.user.presentation.UserViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
-
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.kotlinx.json.json
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import io.ktor.client.call.body
-import io.ktor.client.request.*
-import io.ktor.http.ContentType
-import kotlinx.coroutines.launch
+import org.koin.core.context.startKoin
+import org.koin.dsl.module
 
 @Composable
 @Preview
 fun App() {
-    val httpClient = HttpClient {
-        install(ContentNegotiation) {
-            json()
+    initializeKoin()
+
+    // Set up the theme based on the system settings
+    val colors by mutableStateOf(
+        if(isSystemInDarkTheme()) darkScheme else lightScheme
+    )
+
+    MaterialTheme(colorScheme = colors) {
+        Navigator(LoginScreen()) {
+            SlideTransition(it)
         }
     }
+}
 
-    val scope = rememberCoroutineScope()
-    var loading by remember { mutableStateOf(false) }
-    var dialogMessage by remember { mutableStateOf<String?>(null) }
+val mongoModule = module {
+    single { MongoDB() }
+    factory { UserViewModel(get()) }
+    factory { LoginViewModel(get()) }
+}
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Button(
-            onClick = {
-                scope.launch {
-                    loading = true
-                    try {
-                        val response: String = httpClient.get("http://192.168.0.54:8080/hello") {
-                            accept(ContentType.Text.Plain)
-                        }.body() // Ensure we extract the response body correctly
-                        dialogMessage = response
-                    } catch (e: Exception) {
-                        dialogMessage = "Failed to load data"
-                    } finally {
-                        loading = false
-                    }
-
-                }
-            },
-            enabled = !loading
-        ) {
-            if (loading) {
-                Text("Loading...")
-            } else {
-                Text("Request Hello World")
-            }
-        }
-    }
-
-    // Show Dialog when response is received
-    dialogMessage?.let {
-        AlertDialog(
-            onDismissRequest = { dialogMessage = null },
-            title = { Text("Response") },
-            text = { Text(it) },
-            confirmButton = {
-                Button(onClick = { dialogMessage = null }) {
-                    Text("OK")
-                }
-            }
-        )
+fun initializeKoin() {
+    startKoin {
+        modules(mongoModule)
     }
 }
