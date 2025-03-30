@@ -19,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,18 +39,41 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.koinScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.Tab
+import cafe.adriel.voyager.navigator.tab.TabOptions
 
-class UserScreen : Screen {
+class UserScreen : Screen, Tab {
+
+    override val options: TabOptions
+        @Composable
+        get() {
+            val icon = rememberVectorPainter(Icons.Default.Face)
+
+            return remember {
+                TabOptions(
+                    index = 0u,
+                    title = "Home",
+                    icon = icon
+                )
+            }
+        }
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) // Needed for FlowRow and InputChip
     @Composable
     override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+        val viewModel = koinScreenModel<UserViewModel>()
+
         // Get ViewModel instance using Koin (or your DI method)
         // Assumes UserViewModel implements ScreenModel
-        val viewModel = remember { UserViewModel() } // Use remember for stability across recompositions
+        //val viewModel = koinScreenModel
         val state by viewModel.state.collectAsState()
 
         // Temporary state for the "Add Hobby" TextField

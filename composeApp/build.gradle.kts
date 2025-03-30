@@ -63,6 +63,7 @@ kotlin {
             implementation(libs.navigator.koin)
             implementation(libs.navigator.screen.model)
             implementation(libs.navigator.transitions)
+            implementation(libs.voyager.tabNavigator)
 
             // koin - Dependency Injection
             implementation(libs.koin.core)
@@ -111,6 +112,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.material3.android)
     debugImplementation(compose.uiTooling)
 }
 

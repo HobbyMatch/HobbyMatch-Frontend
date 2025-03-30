@@ -5,6 +5,7 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
+import io2.hobbymatch.user.data.local.realm.MongoDB
 import io2.hobbymatch.user.data.local.realm.RealmDatabase
 import io2.hobbymatch.user.data.local.realm.UserProfileRealm
 import kotlinx.coroutines.Dispatchers
@@ -50,7 +51,7 @@ sealed class UserUiEvent {
 
 
 // Implement ScreenModel instead of ViewModel
-class UserViewModel(/* Inject dependencies like repositories here */) : ScreenModel {
+class UserViewModel(private val mongoDB: MongoDB? = null) : ScreenModel {
     // Get the Realm instance from the singleton
     private val realm: Realm = RealmDatabase.instance // <-- Access Realm here
 
