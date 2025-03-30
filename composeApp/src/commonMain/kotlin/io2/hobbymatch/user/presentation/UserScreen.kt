@@ -58,7 +58,7 @@ class UserScreen : Screen, Tab {
 
             return remember {
                 TabOptions(
-                    index = 0u,
+                    index = 1u,
                     title = "Home",
                     icon = icon
                 )
