@@ -1,8 +1,7 @@
-package io2.hobbymatch.utils
+package io2.hobbymatch.utils.navigation
 
 import androidx.compose.runtime.Composable
 import cafe.adriel.voyager.core.screen.Screen
-import io2.hobbymatch.utils.navigation.BottomNavigationScaffolding
 
 class ScaffoldingScreen : Screen {
     @Composable

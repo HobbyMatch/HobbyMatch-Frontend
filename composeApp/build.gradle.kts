@@ -51,9 +51,6 @@ kotlin {
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.client.content.negotiation)
 
-            // Compose navigation (probably not gonna use that)
-            implementation(libs.androidx.compose.navigation)
-
             // kotlinx serialization
             implementation(libs.kotlinx.serialization.core)
             implementation(libs.kotlinx.serialization.json)

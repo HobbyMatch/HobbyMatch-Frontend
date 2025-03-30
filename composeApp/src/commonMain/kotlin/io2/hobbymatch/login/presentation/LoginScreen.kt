@@ -2,9 +2,7 @@ package io2.hobbymatch.login.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -16,7 +14,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -27,7 +24,7 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.http.ContentType
 import io.ktor.serialization.kotlinx.json.json
-import io2.hobbymatch.utils.ScaffoldingScreen
+import io2.hobbymatch.utils.navigation.ScaffoldingScreen
 import kotlinx.coroutines.launch
 
 class LoginScreen : Screen {
@@ -36,6 +33,33 @@ class LoginScreen : Screen {
         // navigator
         val navigator = LocalNavigator.currentOrThrow
 
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            /* ============== HERE MODIFY ================ */
+            Button(
+                onClick = {
+                    /*  */
+                }
+            ) {
+                Text("Login")
+            }
+            /* =========================================== */
+            Button(
+                onClick = {
+                    //navigator.push(UserScreen())
+                    navigator.push(ScaffoldingScreen())
+                }
+            ) {
+                Text("Go to User Screen (SignIn in the future)")
+            }
+        }
+    }
+
+    @Composable
+    fun Garbage() {
         val httpClient = HttpClient {
             install(ContentNegotiation) {
                 json()
@@ -75,16 +99,6 @@ class LoginScreen : Screen {
                 } else {
                     Text("Request Hello World")
                 }
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            Button(
-                onClick = {
-                    //navigator.push(UserScreen())
-                    navigator.push(ScaffoldingScreen())
-                },
-                enabled = !loading
-            ) {
-                Text("Go to User Screen (SignIn in the future)")
             }
         }
 

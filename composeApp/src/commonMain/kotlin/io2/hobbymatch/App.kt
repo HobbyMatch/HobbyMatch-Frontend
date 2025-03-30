@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
 import io2.hobbymatch.login.presentation.LoginScreen
+import io2.hobbymatch.login.presentation.LoginViewModel
 import io2.hobbymatch.ui.theme.darkScheme
 import io2.hobbymatch.ui.theme.lightScheme
 import io2.hobbymatch.user.data.local.realm.MongoDB
@@ -36,6 +37,7 @@ fun App() {
 val mongoModule = module {
     single { MongoDB() }
     factory { UserViewModel(get()) }
+    factory { LoginViewModel(get()) }
 }
 
 fun initializeKoin() {
