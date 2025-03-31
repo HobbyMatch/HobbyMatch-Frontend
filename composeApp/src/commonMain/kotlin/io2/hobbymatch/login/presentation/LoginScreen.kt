@@ -63,13 +63,36 @@ class LoginScreen : Screen {
             /* ============== HERE MODIFY ================ */
 
 
+//            if(authReady) {
+//                Box(
+//                    modifier= Modifier.fillMaxSize(),
+//                    contentAlignment = Alignment.Center
+//                ){
+//                    GoogleButtonUiContainer(
+//                        onGoogleSignInResult = {googleUser ->
+//                            val token = googleUser?.idToken
+//                            token?.let{
+//                                tokenId = it
+//                                println("TOKEN ID: $tokenId")
+//                            } ?: run{
+//                                errorMessage = "Google Sign-In failed: Token is null."
+//                            }
+//                        }
+//                    ){
+//                        GoogleSignInButton(
+//                            onClick = {this.onClick()}
+//                        )
+//                    }
+//                }
+//            }
+
             if(authReady) {
                 Box(
-                    modifier= Modifier.fillMaxSize(),
+                    // modifier = Modifier.fillMaxSize(), // <-- USUŃ LUB ZAKOMENTUJ TĘ LINIĘ
                     contentAlignment = Alignment.Center
                 ){
                     GoogleButtonUiContainer(
-                        onGoogleSignInResult = {googleUser ->
+                        onGoogleSignInResult = { googleUser ->
                             val token = googleUser?.idToken
                             token?.let{
                                 tokenId = it
@@ -112,13 +135,6 @@ class LoginScreen : Screen {
                 )
             }
 
-            Button(
-                onClick = {
-                    /*  */
-                }
-            ) {
-                Text("Login")
-            }
             /* =========================================== */
             Button(
                 onClick = {
