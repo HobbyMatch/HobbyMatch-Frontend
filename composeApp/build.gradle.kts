@@ -73,6 +73,10 @@ kotlin {
 
             // Coroutines - kotlinx.coroutines library for non-blocking asynchronous computations
             implementation(libs.kotlin.coroutines)
+
+            //Google Auth
+            implementation("io.github.mirzemehdi:kmpauth-google:2.0.0")
+            implementation("io.github.mirzemehdi:kmpauth-uihelper:2.0.0")
         }
         iosMain.dependencies {
             // ktor - Network connectivity - iOS
@@ -110,6 +114,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.material3.android)
+    implementation(libs.androidx.foundation.layout.android)
     debugImplementation(compose.uiTooling)
 }
 
