@@ -1,12 +1,14 @@
 package io2.hobbymatch.login.presentation
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,6 +19,10 @@ import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.mmk.kmpauth.google.GoogleAuthCredentials
+import com.mmk.kmpauth.google.GoogleAuthProvider
+import com.mmk.kmpauth.google.GoogleButtonUiContainer
+import com.mmk.kmpauth.uihelper.google.GoogleSignInButton
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -33,19 +39,102 @@ class LoginScreen : Screen {
         // navigator
         val navigator = LocalNavigator.currentOrThrow
 
+        var authReady by remember{ mutableStateOf(false)}
+        var tokenId by remember { mutableStateOf<String?>(null) }
+        var errorMessage by remember { mutableStateOf<String?>(null) }
+
+
+        LaunchedEffect(Unit){
+            GoogleAuthProvider.create(
+                credentials = GoogleAuthCredentials(
+                    //tu nie wiem co ma być:
+                    serverId = "430605857934-hvr50fqobkngjbd2fvgq7tttqvmnqu5i.apps.googleusercontent.com"
+                )
+            )
+            authReady = true
+        }
+
+
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             /* ============== HERE MODIFY ================ */
-            Button(
-                onClick = {
-                    /*  */
+
+
+//            if(authReady) {
+//                Box(
+//                    modifier= Modifier.fillMaxSize(),
+//                    contentAlignment = Alignment.Center
+//                ){
+//                    GoogleButtonUiContainer(
+//                        onGoogleSignInResult = {googleUser ->
+//                            val token = googleUser?.idToken
+//                            token?.let{
+//                                tokenId = it
+//                                println("TOKEN ID: $tokenId")
+//                            } ?: run{
+//                                errorMessage = "Google Sign-In failed: Token is null."
+//                            }
+//                        }
+//                    ){
+//                        GoogleSignInButton(
+//                            onClick = {this.onClick()}
+//                        )
+//                    }
+//                }
+//            }
+
+            if(authReady) {
+                Box(
+                    // modifier = Modifier.fillMaxSize(), // <-- USUŃ LUB ZAKOMENTUJ TĘ LINIĘ
+                    contentAlignment = Alignment.Center
+                ){
+                    GoogleButtonUiContainer(
+                        onGoogleSignInResult = { googleUser ->
+                            val token = googleUser?.idToken
+                            token?.let{
+                                tokenId = it
+                                println("TOKEN ID: $tokenId")
+                            } ?: run{
+                                errorMessage = "Google Sign-In failed: Token is null."
+                            }
+                        }
+                    ){
+                        GoogleSignInButton(
+                            onClick = {this.onClick()}
+                        )
+                    }
                 }
-            ) {
-                Text("Login")
             }
+
+            tokenId?.let {
+                // If you have a valid token, proceed with backend authentication
+                Button(
+                    onClick = {
+                        // Call your authentication API with tokenId here
+                        // For example, sending it to your backend server for validation
+                       // Toast.makeText(context, "Token received: $it", Toast.LENGTH_LONG).show()
+                    }
+                ) {
+                    Text("Authenticate with Backend")
+                }
+            }
+
+            errorMessage?.let {
+                AlertDialog(
+                    onDismissRequest = { errorMessage = null },
+                    title = { Text("Error") },
+                    text = { Text(it) },
+                    confirmButton = {
+                        Button(onClick = { errorMessage = null }) {
+                            Text("OK")
+                        }
+                    }
+                )
+            }
+
             /* =========================================== */
             Button(
                 onClick = {
