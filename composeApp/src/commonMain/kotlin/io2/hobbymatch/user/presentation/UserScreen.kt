@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -58,8 +57,8 @@ class UserScreen : Screen, Tab {
 
             return remember {
                 TabOptions(
-                    index = 0u,
-                    title = "Home",
+                    index = 1u,
+                    title = "User",
                     icon = icon
                 )
             }
@@ -90,7 +89,7 @@ class UserScreen : Screen, Tab {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues) // Apply padding from Scaffold
-                    .imePadding()
+                     //.imePadding()
                     .padding(horizontal = 16.dp) // Add horizontal padding
                     .verticalScroll(scrollState), // Make content scrollable
                 horizontalAlignment = Alignment.CenterHorizontally
