@@ -68,6 +68,7 @@ class UserViewModel(private val mongoDB: MongoDB? = null) : ScreenModel {
         loadUserData() // Load data when ViewModel is created
     }
 
+
     fun onEvent(event: UserUiEvent) {
         // Use screenModelScope for coroutines if needed inside event handlers
         when (event) {
