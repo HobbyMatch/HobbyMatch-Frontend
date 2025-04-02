@@ -48,7 +48,7 @@ class LoginScreen : Screen {
             GoogleAuthProvider.create(
                 credentials = GoogleAuthCredentials(
                     //tu nie wiem co ma być:
-                    serverId = "430605857934-hvr50fqobkngjbd2fvgq7tttqvmnqu5i.apps.googleusercontent.com"
+                    serverId = "752456876739-gcngoh8smdobf2mh16vj75shp0e66h67.apps.googleusercontent.com"
                 )
             )
             authReady = true
@@ -61,30 +61,6 @@ class LoginScreen : Screen {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             /* ============== HERE MODIFY ================ */
-
-
-//            if(authReady) {
-//                Box(
-//                    modifier= Modifier.fillMaxSize(),
-//                    contentAlignment = Alignment.Center
-//                ){
-//                    GoogleButtonUiContainer(
-//                        onGoogleSignInResult = {googleUser ->
-//                            val token = googleUser?.idToken
-//                            token?.let{
-//                                tokenId = it
-//                                println("TOKEN ID: $tokenId")
-//                            } ?: run{
-//                                errorMessage = "Google Sign-In failed: Token is null."
-//                            }
-//                        }
-//                    ){
-//                        GoogleSignInButton(
-//                            onClick = {this.onClick()}
-//                        )
-//                    }
-//                }
-//            }
 
             if(authReady) {
                 Box(
