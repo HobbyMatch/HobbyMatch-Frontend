@@ -243,6 +243,27 @@ class UserScreen : Screen, Tab {
                 ) {
                     Text("Save Profile")
                 }
+
+                // --- Logout / Reset Token Button ---
+                Button(
+                    onClick = {
+                        // Send the ResetToken event to the ViewModel
+                        viewModel.onEvent(UserUiEvent.ResetToken)
+                        // Consider navigating away after triggering reset,
+                        // perhaps back to LoginScreen. This logic might belong
+                        // higher up (e.g., observing auth state in App.kt or Scaffolding).
+                        // navigator.popUntilRoot() // Example: Go back to the initial screen
+                    },
+                    enabled = !state.isLoading, // Disable while loading/saving/logging out
+                    modifier = Modifier.fillMaxWidth()
+                    // Optional: Style as a destructive action
+                    // colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Logout (Reset Token)")
+                }
+
+                Spacer(modifier = Modifier.height(8.dp)) // Space between buttons
+
             }
         }
     }

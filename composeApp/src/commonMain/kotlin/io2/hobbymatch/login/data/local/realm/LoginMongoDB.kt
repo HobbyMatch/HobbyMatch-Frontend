@@ -75,6 +75,26 @@ class LoginMongoDB {
             }
     }
 
+    // --- Reset Login Token ---
+    // Deletes the LoginDataRealm object, effectively clearing the saved token.
+    suspend fun resetLoginToken() {
+        val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
+        withContext(Dispatchers.IO) {
+            currentRealm.write {
+                // Query for the object to delete
+                val loginDataToDelete: LoginDataRealm? =
+                    this.query<LoginDataRealm>("id == $0", LOGIN_DATA_ID).first().find()
+
+                // If found, find the latest version in this transaction and delete it
+                loginDataToDelete?.let { foundObject ->
+                    findLatest(foundObject)?.also { latestVersion ->
+                        delete(latestVersion)
+                        println("Login token reset (LoginDataRealm object deleted).") // Optional log
+                    } ?: println("Could not find latest version of LoginDataRealm to delete.")
+                } ?: println("Login token already reset (LoginDataRealm object not found).") // Optional log
+            }
+        }
+    }
 
     fun close() {
         realm?.close()

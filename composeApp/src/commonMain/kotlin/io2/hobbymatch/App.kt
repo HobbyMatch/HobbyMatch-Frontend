@@ -41,7 +41,7 @@ val mongoModule = module {
     single { LoginMongoDB() }
 
     // Inject the correct MongoDB instance into each ViewModel
-    factory { UserViewModel(get<UserMongoDB>()) }
+    factory { UserViewModel(get<UserMongoDB>(), get<LoginMongoDB>()) }
     factory { LoginViewModel(get<LoginMongoDB>()) }
 }
 

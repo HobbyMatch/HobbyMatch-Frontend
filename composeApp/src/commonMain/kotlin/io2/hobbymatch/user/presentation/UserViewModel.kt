@@ -3,6 +3,7 @@ package io2.hobbymatch.user.presentation
 // Import ScreenModel and screenModelScope
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import io2.hobbymatch.login.data.local.realm.LoginMongoDB
 import io2.hobbymatch.user.data.local.realm.UserMongoDB
 import io2.hobbymatch.user.data.local.realm.UserProfileRealm
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +44,7 @@ sealed class UserUiEvent {
     data class EnterBirthday(val birthday: String) : UserUiEvent()
     data class EnterGender(val gender: String) : UserUiEvent()
     data class EnterBio(val bio: String) : UserUiEvent()
+    data object ResetToken : UserUiEvent()
     data object Save : UserUiEvent()
     // Maybe add Load event if data needs fetching initially
     // data object Load : UserUiEvent()
@@ -50,7 +52,10 @@ sealed class UserUiEvent {
 
 
 // Inject non-nullable MongoDB - Koin should provide it
-class UserViewModel(private val userMongoDB: UserMongoDB) : ScreenModel {
+class UserViewModel(
+    private val userMongoDB: UserMongoDB,
+    private val loginMongoDB: LoginMongoDB
+) : ScreenModel {
 
     // MutableStateFlow for internal state management
     private val _state = MutableStateFlow(UserScreenState())
@@ -126,6 +131,7 @@ class UserViewModel(private val userMongoDB: UserMongoDB) : ScreenModel {
                 _state.update { it.copy(hobbies = it.hobbies - event.hobby) }
             }
             UserUiEvent.Save -> saveUserData() // Call the refactored save function
+            UserUiEvent.ResetToken -> resetLoginToken() // Handle the reset event
         }
     }
 
@@ -170,8 +176,28 @@ class UserViewModel(private val userMongoDB: UserMongoDB) : ScreenModel {
         }
     }
 
-    // Remove the old loadUserData function as it's replaced by observeUserProfile
-    // private fun loadUserData() { ... }
+    // Reset Login Token using the injected LoginMongoDB
+    private fun resetLoginToken() {
+        screenModelScope.launch {
+            _state.update { it.copy(isLoading = true, errorMessage = null) } // Indicate working
+            try {
+                loginMongoDB.resetLoginToken() // Call the reset method
+                _state.update { it.copy(isLoading = false) }
+                // NOTE: After token reset, the UI should ideally navigate away.
+                // This ViewModel should not handle navigation directly.
+                // The UI layer (e.g., App observing auth state) should react.
+                // You might want to clear the user profile fields here too:
+                // _state.value = UserScreenState(isLoading = false) // Reset state
+
+            } catch (e: Exception) {
+                _state.update { it.copy(
+                    isLoading = false,
+                    isError = true,
+                    errorMessage = "Logout Failed: ${e.message ?: "Unknown error"}"
+                )}
+            }
+        }
+    }
 
     // Clean up Realm connection when ViewModel is cleared
     fun onCleared() {
