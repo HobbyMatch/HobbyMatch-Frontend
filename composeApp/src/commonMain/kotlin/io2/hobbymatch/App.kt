@@ -7,11 +7,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
+import io2.hobbymatch.login.data.local.realm.LoginMongoDB
 import io2.hobbymatch.login.presentation.LoginScreen
 import io2.hobbymatch.login.presentation.LoginViewModel
 import io2.hobbymatch.ui.theme.darkScheme
 import io2.hobbymatch.ui.theme.lightScheme
-import io2.hobbymatch.user.data.local.realm.MongoDB
+import io2.hobbymatch.user.data.local.realm.UserMongoDB
 import io2.hobbymatch.user.presentation.UserViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.core.context.startKoin
@@ -35,10 +36,15 @@ fun App() {
 }
 
 val mongoModule = module {
-    single { MongoDB() }
-    factory { UserViewModel(get()) }
-    factory { LoginViewModel(get()) }
+    // Register BOTH MongoDB instances as singletons
+    single { UserMongoDB() }
+    single { LoginMongoDB() }
+
+    // Inject the correct MongoDB instance into each ViewModel
+    factory { UserViewModel(get<UserMongoDB>(), get<LoginMongoDB>()) }
+    factory { LoginViewModel(get<LoginMongoDB>()) }
 }
+
 
 fun initializeKoin() {
     startKoin {
