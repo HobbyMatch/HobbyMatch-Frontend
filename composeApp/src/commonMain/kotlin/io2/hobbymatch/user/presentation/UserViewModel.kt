@@ -3,17 +3,16 @@ package io2.hobbymatch.user.presentation
 // Import ScreenModel and screenModelScope
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import io.realm.kotlin.Realm
-import io.realm.kotlin.ext.query
-import io2.hobbymatch.user.data.local.realm.MongoDB
-import io2.hobbymatch.user.data.local.realm.RealmDatabase
+import io2.hobbymatch.user.data.local.realm.UserMongoDB
 import io2.hobbymatch.user.data.local.realm.UserProfileRealm
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch // Import launch
 
 // State and Event classes remain the same...
@@ -50,150 +49,133 @@ sealed class UserUiEvent {
 }
 
 
-// Implement ScreenModel instead of ViewModel
-class UserViewModel(private val mongoDB: MongoDB? = null) : ScreenModel {
-    // Get the Realm instance from the singleton
-    private val realm: Realm = RealmDatabase.instance // <-- Access Realm here
+// Inject non-nullable MongoDB - Koin should provide it
+class UserViewModel(private val userMongoDB: UserMongoDB) : ScreenModel {
 
-    private var _state = MutableStateFlow(UserScreenState())
-    val state: StateFlow<UserScreenState> = _state.stateIn(
-        // Use screenModelScope
-        scope = screenModelScope,
-        started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
-        initialValue = UserScreenState()
-    )
+    // MutableStateFlow for internal state management
+    private val _state = MutableStateFlow(UserScreenState())
+    // Expose StateFlow publicly - no need for stateIn if collecting a flow below
+    val state: StateFlow<UserScreenState> = _state.asStateFlow()
 
-    // --- init block and onEvent function remain the same ---
     init {
-        loadUserData() // Load data when ViewModel is created
+        // Observe user profile changes reactively
+        observeUserProfile()
     }
 
+    // Observe changes from the database using Flow
+    private fun observeUserProfile() {
+        // Assuming mongoDB is non-null due to injection
+        userMongoDB.getUserProfileFlow()
+            .onStart {
+                // Can confirm loading state, though initial state covers it
+                _state.update { it.copy(isLoading = true, isError = false, errorMessage = null) }
+            }
+            .onEach { profile ->
+                // Map the Realm object (or null) to the UI State
+                if (profile != null) {
+                    _state.value = UserScreenState(
+                        email = profile.email,
+                        username = profile.username,
+                        name = profile.name,
+                        surname = profile.surname,
+                        birthday = profile.birthday,
+                        gender = profile.gender,
+                        bio = profile.bio,
+                        hobbies = profile.hobbies.toList(), // Convert RealmList to List
+                        isLoading = false, // Data loaded/updated
+                        isError = false,
+                        errorMessage = null
+                    )
+                } else {
+                    // No profile found, reset to default non-loading state
+                    // Keep potentially entered data if needed, or reset fully:
+                    _state.value = UserScreenState(isLoading = false, isError = false) // Example: Full reset
+                    // Or only update loading/error state:
+                    // _state.update { it.copy(isLoading = false, isError = false, errorMessage = null) }
+                }
+            }
+            .catch { e ->
+                // Handle errors during Flow collection
+                _state.update { it.copy(
+                    isLoading = false,
+                    isError = true,
+                    errorMessage = "Failed to load profile: ${e.message ?: "Unknown error"}"
+                )}
+            }
+            // Collect the flow within the screenModelScope
+            .launchIn(screenModelScope)
+    }
 
     fun onEvent(event: UserUiEvent) {
-        // Use screenModelScope for coroutines if needed inside event handlers
+        // Use .update for atomic state updates
         when (event) {
-            is UserUiEvent.EnterUsername -> _state.value = _state.value.copy(username = event.username)
-            is UserUiEvent.EnterEmail -> _state.value = _state.value.copy(email = event.email)
-            is UserUiEvent.EnterName -> _state.value = _state.value.copy(name = event.name)
-            is UserUiEvent.EnterSurname -> _state.value = _state.value.copy(surname = event.surname)
-            is UserUiEvent.EnterBirthday -> _state.value = _state.value.copy(birthday = event.birthday)
-            is UserUiEvent.EnterGender -> _state.value = _state.value.copy(gender = event.gender)
-            is UserUiEvent.EnterBio -> _state.value = _state.value.copy(bio = event.bio)
+            is UserUiEvent.EnterUsername -> _state.update { it.copy(username = event.username) }
+            is UserUiEvent.EnterEmail -> _state.update { it.copy(email = event.email) }
+            is UserUiEvent.EnterName -> _state.update { it.copy(name = event.name) }
+            is UserUiEvent.EnterSurname -> _state.update { it.copy(surname = event.surname) }
+            is UserUiEvent.EnterBirthday -> _state.update { it.copy(birthday = event.birthday) }
+            is UserUiEvent.EnterGender -> _state.update { it.copy(gender = event.gender) }
+            is UserUiEvent.EnterBio -> _state.update { it.copy(bio = event.bio) }
 
             is UserUiEvent.AddHobby -> {
                 if (event.hobby.isNotBlank() && event.hobby !in _state.value.hobbies) {
-                    _state.value = _state.value.copy(hobbies = _state.value.hobbies + event.hobby.trim())
+                    _state.update { it.copy(hobbies = it.hobbies + event.hobby.trim()) }
                 }
             }
             is UserUiEvent.RemoveHobby -> {
-                _state.value = _state.value.copy(hobbies = _state.value.hobbies - event.hobby)
+                _state.update { it.copy(hobbies = it.hobbies - event.hobby) }
             }
-            UserUiEvent.Save -> saveUserData()
-            // Handle Load event if added
-            // UserUiEvent.Load -> loadUserData()
+            UserUiEvent.Save -> saveUserData() // Call the refactored save function
         }
     }
 
-    // --- saveUserData and loadUserData now use the 'realm' property defined above ---
+    // Refactored saveUserData using injected mongoDB
     private fun saveUserData() {
-        val currentUserState = state.value
+        val currentUserState = state.value // Get current UI state
 
-        screenModelScope.launch(Dispatchers.IO) {
-            _state.value = _state.value.copy(isLoading = true, isError = false, errorMessage = null)
+        // Create a UserProfileRealm object from the current UI state
+        // The ID ("SINGLE_USER_PROFILE") will be handled by mongoDB.saveUserProfile
+        val profileToSave = UserProfileRealm().apply {
+            email = currentUserState.email
+            username = currentUserState.username
+            name = currentUserState.name
+            surname = currentUserState.surname
+            birthday = currentUserState.birthday
+            gender = currentUserState.gender
+            bio = currentUserState.bio
+            hobbies.addAll(currentUserState.hobbies)
+        }
+
+        screenModelScope.launch { // Launch in default scope, IO is handled by MongoDB class
+            // Set loading state before saving
+            _state.update { it.copy(isLoading = true, isError = false, errorMessage = null) }
             try {
-                // Use the 'realm' property from the class
-                realm.write {
-                    val existingProfile: UserProfileRealm? =
-                        this.query<UserProfileRealm>("id == $0", "SINGLE_USER_PROFILE").first().find()
+                // Call the save function in MongoDB class (assuming non-null)
+                userMongoDB.saveUserProfile(profileToSave)
 
-                    if (existingProfile != null) {
-                        // --- Update Existing Profile ---
-                        existingProfile.email = currentUserState.email
-                        // --- Start Added Code ---
-                        existingProfile.username = currentUserState.username
-                        existingProfile.name = currentUserState.name
-                        existingProfile.surname = currentUserState.surname
-                        existingProfile.birthday = currentUserState.birthday
-                        existingProfile.gender = currentUserState.gender
-                        existingProfile.bio = currentUserState.bio
-                        // --- End Added Code ---
-                        // Update hobbies list: Clear existing and add current ones
-                        existingProfile.hobbies.clear()
-                        existingProfile.hobbies.addAll(currentUserState.hobbies)
-                    } else {
-                        // --- Create New Profile ---
-                        this.copyToRealm(UserProfileRealm().apply {
-                            // id is set by default ("SINGLE_USER_PROFILE")
-                            // --- Start Added Code ---
-                            email = currentUserState.email
-                            username = currentUserState.username
-                            name = currentUserState.name
-                            surname = currentUserState.surname
-                            birthday = currentUserState.birthday
-                            gender = currentUserState.gender
-                            bio = currentUserState.bio
-                            // --- End Added Code ---
-                            // Add hobbies
-                            hobbies.addAll(currentUserState.hobbies)
-                        })
-                    }
-                }
-                launch(Dispatchers.Main) {
-                    _state.value = _state.value.copy(isLoading = false)
-                }
+                // On successful save, the Flow observed in observeUserProfile
+                // should automatically emit the new state, updating the UI
+                // and setting isLoading = false.
+                // We might only need to manually turn off loading if there's an error.
+                // _state.update { it.copy(isLoading = false) } // Usually not needed here if Flow works
+
             } catch (e: Exception) {
-                launch(Dispatchers.Main) {
-                    _state.value = _state.value.copy(
-                        isLoading = false,
-                        isError = true,
-                        errorMessage = "Failed to save profile: ${e.message ?: "Unknown error"}"
-                    )
-                }
+                // Update state on error
+                _state.update { it.copy(
+                    isLoading = false,
+                    isError = true,
+                    errorMessage = "Failed to save profile: ${e.message ?: "Unknown error"}"
+                )}
             }
         }
     }
 
-    private fun loadUserData() {
-        screenModelScope.launch(Dispatchers.IO) {
-            _state.value = _state.value.copy(isLoading = true, isError = false, errorMessage = null)
-            try {
-                // Use the 'realm' property from the class
-                val profile = realm.query<UserProfileRealm>("id == $0", "SINGLE_USER_PROFILE").first().find()
+    // Remove the old loadUserData function as it's replaced by observeUserProfile
+    // private fun loadUserData() { ... }
 
-                launch(Dispatchers.Main) {
-                    if (profile != null) {
-                        // --- Map loaded Realm data to UI State ---
-                        _state.value = UserScreenState(
-                            // --- Start Added Code ---
-                            email = profile.email,
-                            username = profile.username,
-                            name = profile.name,
-                            surname = profile.surname,
-                            birthday = profile.birthday,
-                            gender = profile.gender,
-                            bio = profile.bio,
-                            // --- End Added Code ---
-                            hobbies = profile.hobbies.toList(), // Convert RealmList to List for state
-                            isLoading = false, // Data loaded successfully
-                            isError = false,
-                            errorMessage = null
-                            // isLoggedIn = ... // Set based on actual auth status if available
-                        )
-                    } else {
-                        // No profile found, reset to default state but stop loading
-                        _state.value = UserScreenState(isLoading = false) // Keep defaults, just stop loading
-                        // Or: _state.value = _state.value.copy(isLoading = false) // Keep potentially entered data
-                    }
-                }
-            } catch(e: Exception) {
-                launch(Dispatchers.Main) {
-                    _state.value = _state.value.copy(
-                        isLoading = false,
-                        isError = true,
-                        errorMessage = "Failed to load profile: ${e.message ?: "Unknown error"}"
-                    )
-                }
-            }
-        }
+    // Clean up Realm connection when ViewModel is cleared
+    fun onCleared() {
+        // Assuming mongoDB instance is non-null
+        userMongoDB.close()
     }
 }

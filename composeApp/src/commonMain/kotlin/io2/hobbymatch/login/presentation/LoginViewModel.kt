@@ -2,9 +2,7 @@ package io2.hobbymatch.login.presentation
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import io.realm.kotlin.Realm
-import io2.hobbymatch.user.data.local.realm.MongoDB
-import io2.hobbymatch.user.data.local.realm.RealmDatabase
+import io2.hobbymatch.login.data.local.realm.LoginMongoDB
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -23,8 +21,7 @@ sealed class LoginUiEvent {
     data object ClickLogin : LoginUiEvent()
 }
 
-class LoginViewModel(private val mongoDB: MongoDB? = null) : ScreenModel {
-    private val realm: Realm = RealmDatabase.instance
+class LoginViewModel(private val loginMongoDB: LoginMongoDB) : ScreenModel {
 
     private var _state = MutableStateFlow(LoginScreenState())
     val state: StateFlow<LoginScreenState> = _state.stateIn(
@@ -38,6 +35,7 @@ class LoginViewModel(private val mongoDB: MongoDB? = null) : ScreenModel {
             LoginUiEvent.ClickLogin -> { /* TODO - networking will be here */ }
         }
     }
+
 
     /* ======================== WRITE CODE BELOW ======================== */
 
