@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 // Define a constant for the profile ID
 private const val SINGLE_USER_PROFILE_ID = "SINGLE_USER_PROFILE"
 
-class MongoDB {
+class UserMongoDB {
     private var realm: Realm? = null
 
     init {
