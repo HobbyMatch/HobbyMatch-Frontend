@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.realm.plugin)
+    // alias(libs.plugins.kotlinCocoapods)
 }
 
 kotlin {
@@ -26,7 +27,25 @@ kotlin {
             isStatic = true
         }
     }
-    
+
+    // For now skipping this
+//    cocoapods {
+//        // === Wymagana linia ===
+//        version = "1.0.0" // Ustaw wersję swojego modułu KMP (np. "0.1.0", "1.0.0")
+//        ios.deploymentTarget = "18.0"
+////        // === Zalecane (opcjonalne) pola ===
+////        summary = "Shared module for HobbyMatch app" // Krótki opis Twojego modułu
+////        homepage = "link/do/twojego/repozytorium/lub/projektu" // Opcjonalnie
+////
+////        // === Konfiguracja Frameworka (opcjonalne) ===
+////        framework {
+////            baseName = "composeApp" // Nazwa frameworka generowanego dla Xcode (można zmienić np. na "Shared")
+////            // isStatic = false // Domyślnie jest dynamiczny, zmień na true jeśli potrzebujesz statycznego
+////        }
+//
+//        pod("MapLibre", "6.9.0")
+//    }
+
     sourceSets {
         
         androidMain.dependencies {
@@ -77,6 +96,13 @@ kotlin {
             //Google Auth
             implementation("io.github.mirzemehdi:kmpauth-google:2.0.0")
             implementation("io.github.mirzemehdi:kmpauth-uihelper:2.0.0")
+
+            // Map Libre Compose
+            // implementation(libs.maplibre.compose)
+        }
+        androidMain.dependencies {
+            // ktor - Network connectivity - Android
+            implementation(libs.ktor.client.android)
         }
         iosMain.dependencies {
             // ktor - Network connectivity - iOS
@@ -117,4 +143,3 @@ dependencies {
     implementation(libs.androidx.foundation.layout.android)
     debugImplementation(compose.uiTooling)
 }
-
