@@ -27,6 +27,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
+@Suppress("ktlint:standard:function-naming")
 @Composable
 @Preview
 fun App() {
@@ -34,7 +35,7 @@ fun App() {
 
     // Set up the theme based on the system settings
     val colors by mutableStateOf(
-        if(isSystemInDarkTheme()) darkScheme else lightScheme
+        if (isSystemInDarkTheme()) darkScheme else lightScheme,
     )
 
     MaterialTheme(colorScheme = colors) {
@@ -44,46 +45,47 @@ fun App() {
     }
 }
 
-val mongoModule = module {
-    // Register BOTH MongoDB instances as singletons
-    single { UserMongoDB() }
-    single { LoginMongoDB() }
+val mongoModule =
+    module {
+        // Register BOTH MongoDB instances as singletons
+        single { UserMongoDB() }
+        single { LoginMongoDB() }
 
-    // Inject the correct MongoDB instance into each ViewModel
-    factory { UserViewModel(get<UserMongoDB>(), get<LoginMongoDB>()) }
-    factory { LoginViewModel(get<LoginMongoDB>()) }
-}
-
+        // Inject the correct MongoDB instance into each ViewModel
+        factory { UserViewModel(get<UserMongoDB>(), get<LoginMongoDB>()) }
+        factory { LoginViewModel(get<LoginMongoDB>()) }
+    }
 
 // Połącz wszystkie moduły
 fun initializeKoin() {
     startKoin {
         modules(
             networkModule, // Dodaj moduł sieciowy
-            appModule      // Przemianuj stary moduł lub dodaj nowy
+            appModule, // Przemianuj stary moduł lub dodaj nowy
         )
     }
 }
 
 // Stary 'mongoModule' można przemianować lub połączyć
-val appModule = module {
-    // --- Baza Danych ---
-    single { UserMongoDB() }
-    single { LoginMongoDB() }
+val appModule =
+    module {
+        // --- Baza Danych ---
+        single { UserMongoDB() }
+        single { LoginMongoDB() }
 
-    // --- Sieć (ApiService) ---
-    single<LoginApiService> { LoginApiServiceImpl(get()) } // Wstrzyknij HttpClient
-    single<UserApiService> { UserApiServiceImpl(get()) }   // Wstrzyknij HttpClient
+        // --- Sieć (ApiService) ---
+        single<LoginApiService> { LoginApiServiceImpl(get()) } // Wstrzyknij HttpClient
+        single<UserApiService> { UserApiServiceImpl(get()) } // Wstrzyknij HttpClient
 
-    // --- Repozytoria ---
-    single<LoginRepository> { LoginRepositoryImpl(get(), get()) } // Wstrzyknij ApiService i MongoDB
-    single<UserRepository> { UserRepositoryImpl(get(), get()) }   // Wstrzyknij ApiService i MongoDB
+        // --- Repozytoria ---
+        single<LoginRepository> { LoginRepositoryImpl(get(), get()) } // Wstrzyknij ApiService i MongoDB
+        single<UserRepository> { UserRepositoryImpl(get(), get()) } // Wstrzyknij ApiService i MongoDB
 
-    // --- ViewModels ---
+        // --- ViewModels ---
 //    // Teraz wstrzykuj Repozytoria zamiast MongoDB
 //    factory { UserViewModel(get<UserRepository>()) }     // Wstrzyknij UserRepository
 //    factory { LoginViewModel(get<LoginRepository>()) }  // Wstrzyknij LoginRepository
 
-    factory { UserViewModel(get<UserMongoDB>(), get<LoginMongoDB>()) }     // Wstrzyknij UserRepository
-    factory { LoginViewModel(get<LoginMongoDB>()) }
-}
+        factory { UserViewModel(get<UserMongoDB>(), get<LoginMongoDB>()) } // Wstrzyknij UserRepository
+        factory { LoginViewModel(get<LoginMongoDB>()) }
+    }

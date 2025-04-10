@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.realm.plugin)
-    // alias(libs.plugins.kotlinCocoapods)
+    alias(libs.plugins.kotlinCocoapods)
 }
 
 kotlin {
@@ -16,11 +16,11 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
-        iosSimulatorArm64()
+        iosSimulatorArm64(),
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
@@ -29,25 +29,25 @@ kotlin {
     }
 
     // For now skipping this
-//    cocoapods {
-//        // === Wymagana linia ===
-//        version = "1.0.0" // Ustaw wersję swojego modułu KMP (np. "0.1.0", "1.0.0")
-//        ios.deploymentTarget = "18.0"
-////        // === Zalecane (opcjonalne) pola ===
-////        summary = "Shared module for HobbyMatch app" // Krótki opis Twojego modułu
-////        homepage = "link/do/twojego/repozytorium/lub/projektu" // Opcjonalnie
-////
-////        // === Konfiguracja Frameworka (opcjonalne) ===
-////        framework {
-////            baseName = "composeApp" // Nazwa frameworka generowanego dla Xcode (można zmienić np. na "Shared")
-////            // isStatic = false // Domyślnie jest dynamiczny, zmień na true jeśli potrzebujesz statycznego
-////        }
+    cocoapods {
+        // === Wymagana linia ===
+        version = "1.0.0" // Ustaw wersję swojego modułu KMP (np. "0.1.0", "1.0.0")
+        ios.deploymentTarget = "15.3"
+//        // === Zalecane (opcjonalne) pola ===
+//        summary = "Shared module for HobbyMatch app" // Krótki opis Twojego modułu
+//        homepage = "link/do/twojego/repozytorium/lub/projektu" // Opcjonalnie
 //
-//        pod("MapLibre", "6.9.0")
-//    }
+//        // === Konfiguracja Frameworka (opcjonalne) ===
+//        framework {
+//            baseName = "composeApp" // Nazwa frameworka generowanego dla Xcode (można zmienić np. na "Shared")
+//            // isStatic = false // Domyślnie jest dynamiczny, zmień na true jeśli potrzebujesz statycznego
+//        }
+
+        pod("MapLibre", "6.9.0")
+    }
 
     sourceSets {
-        
+
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -93,7 +93,7 @@ kotlin {
             // Coroutines - kotlinx.coroutines library for non-blocking asynchronous computations
             implementation(libs.kotlin.coroutines)
 
-            //Google Auth
+            // Google Auth
             implementation("io.github.mirzemehdi:kmpauth-google:2.0.0")
             implementation("io.github.mirzemehdi:kmpauth-uihelper:2.0.0")
 
@@ -113,12 +113,21 @@ kotlin {
 
 android {
     namespace = "io2.hobbymatch"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk =
+        libs.versions.android.compileSdk
+            .get()
+            .toInt()
 
     defaultConfig {
         applicationId = "io2.hobbymatch"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
+        minSdk =
+            libs.versions.android.minSdk
+                .get()
+                .toInt()
+        targetSdk =
+            libs.versions.android.targetSdk
+                .get()
+                .toInt()
         versionCode = 1
         versionName = "1.0"
     }

@@ -8,7 +8,10 @@ interface LoginRepository {
 
     // Operacje na lokalnym tokenie
     suspend fun saveTokenLocally(token: String)
+
     suspend fun loadTokenLocally(): String?
+
     fun getLocalTokenFlow(): Flow<String?>
+
     suspend fun clearLocalToken()
 }

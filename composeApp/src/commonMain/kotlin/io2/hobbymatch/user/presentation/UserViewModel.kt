@@ -31,34 +31,61 @@ data class UserScreenState(
     val isLoading: Boolean = false,
     val isError: Boolean = false,
     val errorMessage: String? = null,
-    val isLoggedIn: Boolean = false // Assuming this would be set based on auth state
+    val isLoggedIn: Boolean = false, // Assuming this would be set based on auth state
 )
 
 sealed class UserUiEvent {
-    data class EnterUsername(val username: String) : UserUiEvent()
-    data class EnterEmail(val email: String) : UserUiEvent()
-    data class EnterName(val name: String) : UserUiEvent()
-    data class EnterSurname(val surname: String) : UserUiEvent()
-    data class AddHobby(val hobby: String) : UserUiEvent()
-    data class RemoveHobby(val hobby: String) : UserUiEvent()
-    data class EnterBirthday(val birthday: String) : UserUiEvent()
-    data class EnterGender(val gender: String) : UserUiEvent()
-    data class EnterBio(val bio: String) : UserUiEvent()
+    data class EnterUsername(
+        val username: String,
+    ) : UserUiEvent()
+
+    data class EnterEmail(
+        val email: String,
+    ) : UserUiEvent()
+
+    data class EnterName(
+        val name: String,
+    ) : UserUiEvent()
+
+    data class EnterSurname(
+        val surname: String,
+    ) : UserUiEvent()
+
+    data class AddHobby(
+        val hobby: String,
+    ) : UserUiEvent()
+
+    data class RemoveHobby(
+        val hobby: String,
+    ) : UserUiEvent()
+
+    data class EnterBirthday(
+        val birthday: String,
+    ) : UserUiEvent()
+
+    data class EnterGender(
+        val gender: String,
+    ) : UserUiEvent()
+
+    data class EnterBio(
+        val bio: String,
+    ) : UserUiEvent()
+
     data object ResetToken : UserUiEvent()
+
     data object Save : UserUiEvent()
     // Maybe add Load event if data needs fetching initially
     // data object Load : UserUiEvent()
 }
 
-
 // Inject non-nullable MongoDB - Koin should provide it
 class UserViewModel(
     private val userMongoDB: UserMongoDB,
-    private val loginMongoDB: LoginMongoDB
+    private val loginMongoDB: LoginMongoDB,
 ) : ScreenModel {
-
     // MutableStateFlow for internal state management
     private val _state = MutableStateFlow(UserScreenState())
+
     // Expose StateFlow publicly - no need for stateIn if collecting a flow below
     val state: StateFlow<UserScreenState> = _state.asStateFlow()
 
@@ -70,27 +97,28 @@ class UserViewModel(
     // Observe changes from the database using Flow
     private fun observeUserProfile() {
         // Assuming mongoDB is non-null due to injection
-        userMongoDB.getUserProfileFlow()
+        userMongoDB
+            .getUserProfileFlow()
             .onStart {
                 // Can confirm loading state, though initial state covers it
                 _state.update { it.copy(isLoading = true, isError = false, errorMessage = null) }
-            }
-            .onEach { profile ->
+            }.onEach { profile ->
                 // Map the Realm object (or null) to the UI State
                 if (profile != null) {
-                    _state.value = UserScreenState(
-                        email = profile.email,
-                        username = profile.username,
-                        name = profile.name,
-                        surname = profile.surname,
-                        birthday = profile.birthday,
-                        gender = profile.gender,
-                        bio = profile.bio,
-                        hobbies = profile.hobbies.toList(), // Convert RealmList to List
-                        isLoading = false, // Data loaded/updated
-                        isError = false,
-                        errorMessage = null
-                    )
+                    _state.value =
+                        UserScreenState(
+                            email = profile.email,
+                            username = profile.username,
+                            name = profile.name,
+                            surname = profile.surname,
+                            birthday = profile.birthday,
+                            gender = profile.gender,
+                            bio = profile.bio,
+                            hobbies = profile.hobbies.toList(), // Convert RealmList to List
+                            isLoading = false, // Data loaded/updated
+                            isError = false,
+                            errorMessage = null,
+                        )
                 } else {
                     // No profile found, reset to default non-loading state
                     // Keep potentially entered data if needed, or reset fully:
@@ -98,14 +126,15 @@ class UserViewModel(
                     // Or only update loading/error state:
                     // _state.update { it.copy(isLoading = false, isError = false, errorMessage = null) }
                 }
-            }
-            .catch { e ->
+            }.catch { e ->
                 // Handle errors during Flow collection
-                _state.update { it.copy(
-                    isLoading = false,
-                    isError = true,
-                    errorMessage = "Failed to load profile: ${e.message ?: "Unknown error"}"
-                )}
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        isError = true,
+                        errorMessage = "Failed to load profile: ${e.message ?: "Unknown error"}",
+                    )
+                }
             }
             // Collect the flow within the screenModelScope
             .launchIn(screenModelScope)
@@ -141,18 +170,20 @@ class UserViewModel(
 
         // Create a UserProfileRealm object from the current UI state
         // The ID ("SINGLE_USER_PROFILE") will be handled by mongoDB.saveUserProfile
-        val profileToSave = UserProfileRealm().apply {
-            email = currentUserState.email
-            username = currentUserState.username
-            name = currentUserState.name
-            surname = currentUserState.surname
-            birthday = currentUserState.birthday
-            gender = currentUserState.gender
-            bio = currentUserState.bio
-            hobbies.addAll(currentUserState.hobbies)
-        }
+        val profileToSave =
+            UserProfileRealm().apply {
+                email = currentUserState.email
+                username = currentUserState.username
+                name = currentUserState.name
+                surname = currentUserState.surname
+                birthday = currentUserState.birthday
+                gender = currentUserState.gender
+                bio = currentUserState.bio
+                hobbies.addAll(currentUserState.hobbies)
+            }
 
-        screenModelScope.launch { // Launch in default scope, IO is handled by MongoDB class
+        screenModelScope.launch {
+            // Launch in default scope, IO is handled by MongoDB class
             // Set loading state before saving
             _state.update { it.copy(isLoading = true, isError = false, errorMessage = null) }
             try {
@@ -164,14 +195,15 @@ class UserViewModel(
                 // and setting isLoading = false.
                 // We might only need to manually turn off loading if there's an error.
                 // _state.update { it.copy(isLoading = false) } // Usually not needed here if Flow works
-
             } catch (e: Exception) {
                 // Update state on error
-                _state.update { it.copy(
-                    isLoading = false,
-                    isError = true,
-                    errorMessage = "Failed to save profile: ${e.message ?: "Unknown error"}"
-                )}
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        isError = true,
+                        errorMessage = "Failed to save profile: ${e.message ?: "Unknown error"}",
+                    )
+                }
             }
         }
     }
@@ -188,13 +220,14 @@ class UserViewModel(
                 // The UI layer (e.g., App observing auth state) should react.
                 // You might want to clear the user profile fields here too:
                 // _state.value = UserScreenState(isLoading = false) // Reset state
-
             } catch (e: Exception) {
-                _state.update { it.copy(
-                    isLoading = false,
-                    isError = true,
-                    errorMessage = "Logout Failed: ${e.message ?: "Unknown error"}"
-                )}
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        isError = true,
+                        errorMessage = "Logout Failed: ${e.message ?: "Unknown error"}",
+                    )
+                }
             }
         }
     }

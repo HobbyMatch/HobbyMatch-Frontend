@@ -7,11 +7,10 @@ import kotlinx.coroutines.flow.Flow
 
 class LoginRepositoryImpl(
     private val loginApiService: LoginApiService,
-    private val loginMongoDB: LoginMongoDB
+    private val loginMongoDB: LoginMongoDB,
 ) : LoginRepository {
-
-    override suspend fun validateTokenWithBackend(idToken: String): Result<Boolean> {
-        return try {
+    override suspend fun validateTokenWithBackend(idToken: String): Result<Boolean> =
+        try {
             val request = TokenValidationRequest(idToken = idToken)
             val response = loginApiService.validateGoogleToken(request)
             // TODO: Zapisz userId lub inne dane z response, jeśli są potrzebne
@@ -20,19 +19,14 @@ class LoginRepositoryImpl(
             println("Backend token validation failed: ${e.message}")
             Result.failure(e)
         }
-    }
 
     override suspend fun saveTokenLocally(token: String) {
         loginMongoDB.saveLoginToken(token)
     }
 
-    override suspend fun loadTokenLocally(): String? {
-        return loginMongoDB.loadLoginToken()
-    }
+    override suspend fun loadTokenLocally(): String? = loginMongoDB.loadLoginToken()
 
-    override fun getLocalTokenFlow(): Flow<String?> {
-        return loginMongoDB.getLoginTokenFlow()
-    }
+    override fun getLocalTokenFlow(): Flow<String?> = loginMongoDB.getLoginTokenFlow()
 
     override suspend fun clearLocalToken() {
         loginMongoDB.resetLoginToken()
