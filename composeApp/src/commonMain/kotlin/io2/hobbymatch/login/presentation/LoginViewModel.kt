@@ -7,6 +7,7 @@ package io2.hobbymatch.login.presentation
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import io2.hobbymatch.login.data.local.realm.LoginMongoDB
+import io2.hobbymatch.network.LoginApiService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +33,7 @@ data class LoginScreenState(
 sealed class LoginUiEvent {
     // Event to trigger saving the token received from Google Sign-In
     data class SaveToken(val token: String) : LoginUiEvent()
+    data class GoogleSignIn(val idToken: String) : LoginUiEvent()
     // Potentially add LoadToken event if not loading automatically in init
     // data object LoadToken : LoginUiEvent()
     // Potentially add ClearToken event for logout
@@ -39,7 +41,62 @@ sealed class LoginUiEvent {
 }
 
 // Inject non-nullable LoginMongoDB
-class LoginViewModel(private val loginMongoDB: LoginMongoDB) : ScreenModel {
+class LoginViewModel(
+    private val loginMongoDB: LoginMongoDB,
+    private val loginApiService: LoginApiService
+) : ScreenModel {
+
+    fun onEvent(event: LoginUiEvent) {
+        when (event) {
+            is LoginUiEvent.SaveToken -> saveToken(event.token)
+            is LoginUiEvent.GoogleSignIn -> handleGoogleSignIn(event.idToken)
+            // Handle other existing events
+        }
+    }
+
+    private fun handleGoogleSignIn(idToken: String) {
+        screenModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+
+            try {
+                val result = loginApiService.authenticateWithGoogle(idToken)
+
+                if (result.isSuccess) {
+                    // Save JWT token received from backend
+                    val jwtToken = result.getOrNull()?.token
+                    if (jwtToken != null) {
+                        loginMongoDB.saveLoginToken(jwtToken)
+                        // State will update via Flow observation
+                    } else {
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                isError = true,
+                                errorMessage = "Received null token from server"
+                            )
+                        }
+                    }
+                } else {
+                    val error = result.exceptionOrNull()?.message ?: "Authentication failed"
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            isError = true,
+                            errorMessage = "Backend authentication failed: $error"
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        isError = true,
+                        errorMessage = "Error during authentication: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
 
     // Remove direct Realm instance
     // private val realm: Realm = RealmDatabase.instance
@@ -81,12 +138,12 @@ class LoginViewModel(private val loginMongoDB: LoginMongoDB) : ScreenModel {
     }
 
 
-    fun onEvent(event: LoginUiEvent) {
-        when (event) {
-            is LoginUiEvent.SaveToken -> saveToken(event.token)
-            // Handle other events like ClearToken if added
-        }
-    }
+//    fun onEvent(event: LoginUiEvent) {
+//        when (event) {
+//            is LoginUiEvent.SaveToken -> saveToken(event.token)
+//            // Handle other events like ClearToken if added
+//        }
+//    }
 
     private fun saveToken(token: String) {
         screenModelScope.launch {

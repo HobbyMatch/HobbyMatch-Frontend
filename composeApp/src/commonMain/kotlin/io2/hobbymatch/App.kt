@@ -10,6 +10,8 @@ import cafe.adriel.voyager.transitions.SlideTransition
 import io2.hobbymatch.login.data.local.realm.LoginMongoDB
 import io2.hobbymatch.login.presentation.LoginScreen
 import io2.hobbymatch.login.presentation.LoginViewModel
+import io2.hobbymatch.network.LoginApiService
+import io2.hobbymatch.network.networkModule
 import io2.hobbymatch.ui.theme.darkScheme
 import io2.hobbymatch.ui.theme.lightScheme
 import io2.hobbymatch.user.data.local.realm.UserMongoDB
@@ -42,12 +44,12 @@ val mongoModule = module {
 
     // Inject the correct MongoDB instance into each ViewModel
     factory { UserViewModel(get<UserMongoDB>(), get<LoginMongoDB>()) }
-    factory { LoginViewModel(get<LoginMongoDB>()) }
+    factory { LoginViewModel(get<LoginMongoDB>(), get<LoginApiService>()) }
 }
 
 
 fun initializeKoin() {
     startKoin {
-        modules(mongoModule)
+        modules(mongoModule, networkModule)
     }
 }

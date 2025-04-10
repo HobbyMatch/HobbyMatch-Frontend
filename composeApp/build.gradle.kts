@@ -74,6 +74,9 @@ kotlin {
             // Coroutines - kotlinx.coroutines library for non-blocking asynchronous computations
             implementation(libs.kotlin.coroutines)
 
+            // ktor - Authentication
+            implementation("io.ktor:ktor-client-auth:2.3.5")
+
             //Google Auth
             implementation("io.github.mirzemehdi:kmpauth-google:2.0.0")
             implementation("io.github.mirzemehdi:kmpauth-uihelper:2.0.0")

@@ -4,6 +4,7 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.notifications.SingleQueryChange
+import io2.hobbymatch.network.TokenStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -51,6 +52,9 @@ class LoginMongoDB {
                         this.token = token
                     })
                 }
+
+                // Also update the TokenStorage
+                TokenStorage.setToken(token)
             }
         }
     }

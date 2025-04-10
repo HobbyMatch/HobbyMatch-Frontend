@@ -60,7 +60,8 @@ class LoginScreen : Screen {
                 credentials = GoogleAuthCredentials(
                     // Use your actual server client ID if needed for backend verification, otherwise maybe not needed here
                     serverId = "752456876739-gcngoh8smdobf2mh16vj75shp0e66h67.apps.googleusercontent.com"
-                )
+//                    serverId = "156779813266-b35gajii2tipc0dnagqakjlpepvgvdkk.apps.googleusercontent.com",
+                    )
             )
             authReady = true
             // Optional: Load token if not using Flow in ViewModel's init
@@ -96,16 +97,27 @@ class LoginScreen : Screen {
             if (authReady && !state.isLoggedIn) {
                 Box(contentAlignment = Alignment.Center) {
                     GoogleButtonUiContainer(
+//                        onGoogleSignInResult = { googleUser ->
+//                            val token = googleUser?.idToken
+//                            if (token != null) {
+//                                println("Google Sign-In Success - TOKEN ID: $token")
+//                                // Send SaveToken event to ViewModel
+//                                viewModel.onEvent(LoginUiEvent.SaveToken(token))
+//                                // Optionally navigate immediately after saving token?
+//                                // navigator.push(ScaffoldingScreen())
+//                            } else {
+//                                // Show UI error if Google Sign-In itself failed
+//                                uiErrorMessage = "Google Sign-In failed: Token is null."
+//                                println("Google Sign-In failed: Token is null.")
+//                            }
+//                        }
                         onGoogleSignInResult = { googleUser ->
                             val token = googleUser?.idToken
                             if (token != null) {
                                 println("Google Sign-In Success - TOKEN ID: $token")
-                                // Send SaveToken event to ViewModel
-                                viewModel.onEvent(LoginUiEvent.SaveToken(token))
-                                // Optionally navigate immediately after saving token?
-                                // navigator.push(ScaffoldingScreen())
+                                // Instead of just saving the Google token, send it to backend
+                                viewModel.onEvent(LoginUiEvent.GoogleSignIn(token))
                             } else {
-                                // Show UI error if Google Sign-In itself failed
                                 uiErrorMessage = "Google Sign-In failed: Token is null."
                                 println("Google Sign-In failed: Token is null.")
                             }
