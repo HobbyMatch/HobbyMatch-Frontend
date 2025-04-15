@@ -138,13 +138,9 @@ class LoginScreen : Screen {
                     onDismissRequest = { /* Maybe add ViewModel event to clear error */ },
                     title = { Text("Error") },
                     text = { Text(it) },
-                    confirmButton = { Button(onClick = { /* ViewModel event to clear error */ }) { Text("OK") } }
+                    confirmButton = { Button(onClick = { viewModel.onEvent(LoginUiEvent.HideError) }) { Text("OK") } }
                 )
             }
         }
     }
-
-    // Remove the Garbage() function if no longer needed
-    // @Composable
-    // fun Garbage() { ... }
 }

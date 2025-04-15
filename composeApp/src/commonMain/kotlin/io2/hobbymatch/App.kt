@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
+import io2.hobbymatch.activity.presentation.ActivityViewModel
 import io2.hobbymatch.login.data.local.realm.LoginMongoDB
 import io2.hobbymatch.login.presentation.LoginScreen
 import io2.hobbymatch.login.presentation.LoginViewModel
@@ -43,6 +44,7 @@ val mongoModule = module {
     // Inject the correct MongoDB instance into each ViewModel
     factory { UserViewModel(get<UserMongoDB>(), get<LoginMongoDB>()) }
     factory { LoginViewModel(get<LoginMongoDB>()) }
+    factory { ActivityViewModel(get<LoginMongoDB>()) }
 }
 
 

@@ -25,7 +25,6 @@ data class UserScreenState(
     val surname: String = "",
     val hobbies: List<String> = emptyList(),
     val birthday: String = "",
-    val gender: String = "",
     val bio: String = "",
     // Add other fields as needed, mainly functional
     val isLoading: Boolean = false,
@@ -42,7 +41,6 @@ sealed class UserUiEvent {
     data class AddHobby(val hobby: String) : UserUiEvent()
     data class RemoveHobby(val hobby: String) : UserUiEvent()
     data class EnterBirthday(val birthday: String) : UserUiEvent()
-    data class EnterGender(val gender: String) : UserUiEvent()
     data class EnterBio(val bio: String) : UserUiEvent()
     data object ResetToken : UserUiEvent()
     data object Save : UserUiEvent()
@@ -50,8 +48,6 @@ sealed class UserUiEvent {
     // data object Load : UserUiEvent()
 }
 
-
-// Inject non-nullable MongoDB - Koin should provide it
 class UserViewModel(
     private val userMongoDB: UserMongoDB,
     private val loginMongoDB: LoginMongoDB
@@ -84,7 +80,6 @@ class UserViewModel(
                         name = profile.name,
                         surname = profile.surname,
                         birthday = profile.birthday,
-                        gender = profile.gender,
                         bio = profile.bio,
                         hobbies = profile.hobbies.toList(), // Convert RealmList to List
                         isLoading = false, // Data loaded/updated
@@ -119,7 +114,6 @@ class UserViewModel(
             is UserUiEvent.EnterName -> _state.update { it.copy(name = event.name) }
             is UserUiEvent.EnterSurname -> _state.update { it.copy(surname = event.surname) }
             is UserUiEvent.EnterBirthday -> _state.update { it.copy(birthday = event.birthday) }
-            is UserUiEvent.EnterGender -> _state.update { it.copy(gender = event.gender) }
             is UserUiEvent.EnterBio -> _state.update { it.copy(bio = event.bio) }
 
             is UserUiEvent.AddHobby -> {
@@ -147,7 +141,6 @@ class UserViewModel(
             name = currentUserState.name
             surname = currentUserState.surname
             birthday = currentUserState.birthday
-            gender = currentUserState.gender
             bio = currentUserState.bio
             hobbies.addAll(currentUserState.hobbies)
         }
