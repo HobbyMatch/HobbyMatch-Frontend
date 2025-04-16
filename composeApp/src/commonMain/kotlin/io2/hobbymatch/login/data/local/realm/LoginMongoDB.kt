@@ -126,6 +126,44 @@ class LoginMongoDB {
         }
     }
 
+    private fun ensureRealmOpen(): Realm {
+        // Prosta metoda zapewniająca, że realm jest otwarty przed użyciem
+        configureTheRealm() // Upewnia się, że jest instancja
+        return realm ?: throw IllegalStateException("Realm initialization failed.")
+    }
+
+    // --- NOWA METODA: Get Application JWT Token Flow ---
+    fun getJwtTokenFlow(): Flow<String?> {
+        val currentRealm = ensureRealmOpen()
+        // Analogicznie do getLoginTokenFlow, ale obserwujemy pole jwtToken
+        return currentRealm.query<LoginDataRealm>("id == $0", LOGIN_DATA_ID)
+            .first()
+            .asFlow()
+            .map { change: SingleQueryChange<LoginDataRealm> ->
+                change.obj?.jwtToken?.ifBlank { null } // Mapuj na String? i traktuj pusty jako null
+            }
+    }
+
+    // --- NOWA METODA: Clear Application JWT Token ---
+    // Czyści tylko pole jwtToken, pozostawiając obiekt (i idToken).
+    suspend fun clearJwtToken() {
+        val currentRealm = ensureRealmOpen()
+        withContext(Dispatchers.IO) {
+            currentRealm.write {
+                val loginDataToUpdate: LoginDataRealm? =
+                    this.query<LoginDataRealm>("id == $0", LOGIN_DATA_ID).first().find()
+
+                // Jeśli obiekt istnieje, znajdź najnowszą wersję i wyczyść pole
+                loginDataToUpdate?.let { foundObject ->
+                    findLatest(foundObject)?.also { latestVersion ->
+                        latestVersion.jwtToken = "" // Ustaw na pusty string
+                        println("App JWT token cleared.") // Opcjonalny log
+                    }
+                } ?: println("App JWT token already cleared (LoginDataRealm object not found or field empty).")
+            }
+        }
+    }
+
     fun close() {
         realm?.close()
         realm = null
