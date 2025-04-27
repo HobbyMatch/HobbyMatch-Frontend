@@ -1,12 +1,18 @@
 package io2.hobbymatch.login.presentation
 
-// Remove direct Realm import if it was ever added
-// import io.realm.kotlin.Realm
-// Remove RealmDatabase import
-// import io2.hobbymatch.user.data.local.realm.RealmDatabase
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import io.ktor.serialization.kotlinx.json.json
 import io2.hobbymatch.login.data.local.realm.LoginMongoDB
+import io2.hobbymatch.login.domain.AuthResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,6 +22,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 
 data class LoginScreenState(
     // val email: String = "", // Maybe needed later for display?
@@ -23,35 +30,73 @@ data class LoginScreenState(
     val isLoading: Boolean = false,
     val isError: Boolean = false,
     val errorMessage: String? = null,
-    // val isLoggedIn: Boolean = false // Determine loggedIn based on savedToken?
-) {
-    // Computed property for convenience
-    val isLoggedIn: Boolean get() = savedToken != null
-}
+    val isLoggedIn: Boolean = false
+)
 
 sealed class LoginUiEvent {
-    // Event to trigger saving the token received from Google Sign-In
     data class SaveToken(val token: String) : LoginUiEvent()
-    // Potentially add LoadToken event if not loading automatically in init
-    // data object LoadToken : LoginUiEvent()
-    // Potentially add ClearToken event for logout
-    // data object ClearToken : LoginUiEvent()
+    data class ValidateToken(val token: String) : LoginUiEvent()
+    data object HideError : LoginUiEvent()
 }
 
-// Inject non-nullable LoginMongoDB
 class LoginViewModel(private val loginMongoDB: LoginMongoDB) : ScreenModel {
 
-    // Remove direct Realm instance
-    // private val realm: Realm = RealmDatabase.instance
+    private val baseUrl = "http://172.20.10.3:8080"
+    private val httpClient = HttpClient {
+        install(ContentNegotiation) {
+            json(Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            })
+        }
+        install(HttpTimeout) {
+            requestTimeoutMillis = 1000
+        }
+    }
 
     private var _state = MutableStateFlow(LoginScreenState())
     val state: StateFlow<LoginScreenState> = _state.asStateFlow()
 
     init {
-        // Load the token automatically when ViewModel is created
-        // Or observe the flow for reactive updates
-        observeToken()
-        // loadTokenOneTime() // Alternative: one-time load
+        //observeToken()
+        screenModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            try {
+                val token = loginMongoDB.loadLoginToken()
+                if (!token.isNullOrBlank()) {
+                    _state.update {
+                        it.copy(
+                            savedToken = token,
+                            isLoading = false,
+                            isError = false,
+                            errorMessage = null
+                        )
+                    }
+                    validateToken(token)
+                } else {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            isError = false,
+                            errorMessage = "Problems with validating token!",
+                            savedToken = null
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        isError = true,
+                        errorMessage = "Failed to load saved token: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
+    fun hideError() {
+        _state.update { it.copy(isError = false, errorMessage = null) }
     }
 
     // Option 1: Observe Flow (Recommended)
@@ -84,35 +129,54 @@ class LoginViewModel(private val loginMongoDB: LoginMongoDB) : ScreenModel {
     fun onEvent(event: LoginUiEvent) {
         when (event) {
             is LoginUiEvent.SaveToken -> saveToken(event.token)
-            // Handle other events like ClearToken if added
+            is LoginUiEvent.ValidateToken -> validateToken(event.token)
+            LoginUiEvent.HideError -> _state.update { it.copy(isError = false, errorMessage = null) }
+        }
+    }
+
+    private fun validateToken(token: String) {
+        screenModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            try {
+                val body = "{ \"idToken\": \"$token\" }"
+
+                println("Token: $token")
+
+                val response = httpClient.post("$baseUrl/auth/mobile/google") {
+                    contentType(ContentType.Application.Json)
+                    //setBody(mapOf("idToken" to token))
+                    setBody(body)
+                }
+
+                if (response.status.value == 200) {
+                    println("Validated with backend!")
+                    val responseBody = response.body<AuthResponse>()
+                    loginMongoDB.saveJwtToken(responseBody.token)
+                    _state.update { it.copy(isLoading = false, isError = false, errorMessage = null, savedToken = token, isLoggedIn = true) }
+                }
+            }
+            catch (e: Exception) {
+                _state.update { it.copy(isLoading = false, isError = true, errorMessage = "Failed to validate token: ${e.message}") }
+            }
         }
     }
 
     private fun saveToken(token: String) {
         screenModelScope.launch {
-            _state.update { it.copy(isLoading = true) } // Indicate loading state
+            _state.update { it.copy(isLoading = true) }
             try {
                 loginMongoDB.saveLoginToken(token)
-                // State will update automatically if observing the flow.
-                // If using one-time load, manually update state:
-                // _state.update { it.copy(savedToken = token, isLoading = false, isError = false, errorMessage = null) }
-                _state.update { it.copy(isLoading = false) } // Turn off loading manually if not observing flow strictly for this save action
-
             } catch (e: Exception) {
                 _state.update { it.copy(isLoading = false, isError = true, errorMessage = "Failed to save token: ${e.message}") }
             }
         }
     }
 
-    // Optional: Add a clear token function for logout
     private fun clearToken() {
         screenModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             try {
-                // Assuming saveLoginToken with empty string clears it,
-                // or add a specific delete method in LoginMongoDB
-                loginMongoDB.saveLoginToken("") // Or implement delete
-                // State will update via Flow if observing
+                loginMongoDB.saveLoginToken("")
                 _state.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
                 _state.update { it.copy(isLoading = false, isError = true, errorMessage = "Failed to clear token: ${e.message}") }

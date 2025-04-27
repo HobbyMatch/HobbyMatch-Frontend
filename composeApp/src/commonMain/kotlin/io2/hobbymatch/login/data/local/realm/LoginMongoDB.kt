@@ -28,6 +28,7 @@ class LoginMongoDB {
             )
                 .name("login.realm") // Optional: Give it a specific name
                 .compactOnLaunch()
+                .deleteRealmIfMigrationNeeded()
                 .build()
             realm = Realm.open(config)
         }
@@ -43,24 +44,53 @@ class LoginMongoDB {
 
                 if (existingLoginData != null) {
                     // Update existing
-                    findLatest(existingLoginData)?.token = token // Or throw error
+                    findLatest(existingLoginData)?.idToken = token // Or throw error
                 } else {
                     // Create new
                     this.copyToRealm(LoginDataRealm().apply {
                         this.id = LOGIN_DATA_ID
-                        this.token = token
+                        this.idToken = token
                     })
                 }
             }
         }
     }
 
-    // --- Load Login Token (One-time) ---
+    // --- Save Login Token ---
+    suspend fun saveJwtToken(jwtToken: String) {
+        val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
+        withContext(Dispatchers.IO) {
+            currentRealm.write {
+                val existingLoginData: LoginDataRealm? =
+                    this.query<LoginDataRealm>("id == $0", LOGIN_DATA_ID).first().find()
+
+                if (existingLoginData != null) {
+                    // Update existing
+                    findLatest(existingLoginData)?.jwtToken = jwtToken // Or throw error
+                } else {
+                    // Create new
+                    this.copyToRealm(LoginDataRealm().apply {
+                        this.id = LOGIN_DATA_ID
+                        this.jwtToken = jwtToken
+                    })
+                }
+            }
+        }
+    }
+
     suspend fun loadLoginToken(): String? {
         val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
         return withContext(Dispatchers.IO) {
             val loginData = currentRealm.query<LoginDataRealm>("id == $0", LOGIN_DATA_ID).first().find()
-            loginData?.token // Return token or null
+            loginData?.idToken // Return token or null
+        }
+    }
+
+    suspend fun loadJwtToken(): String? {
+        val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
+        return withContext(Dispatchers.IO) {
+            val loginData = currentRealm.query<LoginDataRealm>("id == $0", LOGIN_DATA_ID).first().find()
+            loginData?.jwtToken // Return token or null
         }
     }
 
@@ -71,7 +101,7 @@ class LoginMongoDB {
             .first()
             .asFlow()
             .map { change: SingleQueryChange<LoginDataRealm> ->
-                change.obj?.token // Map to the token string or null
+                change.obj?.idToken // Map to the token string or null
             }
     }
 

@@ -6,5 +6,6 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 class LoginDataRealm : RealmObject {
     @PrimaryKey
     var id: String = "LOGIN_DATA"
-    var token: String = ""
+    var idToken: String = ""
+    var jwtToken: String = ""
 }
