@@ -1,6 +1,5 @@
 package io2.hobbymatch.user.presentation
 
-// Import koinScreenModel or your DI equivalent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -70,9 +69,6 @@ class UserScreen : Screen, Tab {
         val navigator = LocalNavigator.currentOrThrow
         val viewModel = koinScreenModel<UserViewModel>()
 
-        // Get ViewModel instance using Koin (or your DI method)
-        // Assumes UserViewModel implements ScreenModel
-        //val viewModel = koinScreenModel
         val state by viewModel.state.collectAsState()
 
         // Temporary state for the "Add Hobby" TextField
@@ -156,16 +152,6 @@ class UserScreen : Screen, Tab {
                     enabled = !state.isLoading,
                     singleLine = true
                     // Consider using a DatePickerDialog here for better UX
-                )
-
-                OutlinedTextField(
-                    value = state.gender,
-                    onValueChange = { viewModel.onEvent(UserUiEvent.EnterGender(it)) },
-                    label = { Text("Gender") },
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    enabled = !state.isLoading,
-                    singleLine = true
-                    // Consider using RadioButtons or DropdownMenu
                 )
 
                 OutlinedTextField(

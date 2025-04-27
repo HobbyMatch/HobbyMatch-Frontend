@@ -1,14 +1,5 @@
 package io2.hobbymatch.login.presentation
 
-// Remove direct Ktor/coroutine scope imports if Garbage() is removed
-// import io.ktor.client.HttpClient
-// import io.ktor.client.call.body
-// import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-// import io.ktor.client.request.accept
-// import io.ktor.client.request.get
-// import io.ktor.http.ContentType
-// import io.ktor.serialization.kotlinx.json.json
-// import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.getScreenModel
+import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.mmk.kmpauth.google.GoogleAuthCredentials
@@ -43,39 +34,25 @@ class LoginScreen : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        // Get ViewModel using Koin
-        val viewModel = getScreenModel<LoginViewModel>()
-        // Observe state from ViewModel
+        val viewModel = koinScreenModel<LoginViewModel>()
         val state by viewModel.state.collectAsState()
 
-        // Local state for Google Auth readiness and UI error messages
         var authReady by remember { mutableStateOf(false) }
-        // Remove local tokenId - use state.savedToken from ViewModel
-        // var tokenId by remember { mutableStateOf<String?>(null) }
         var uiErrorMessage by remember { mutableStateOf<String?>(null) } // For UI-specific errors like Google Sign-In failure
 
-        // Initialize Google Auth Provider
         LaunchedEffect(Unit) {
             GoogleAuthProvider.create(
                 credentials = GoogleAuthCredentials(
-                    // Use your actual server client ID if needed for backend verification, otherwise maybe not needed here
                     serverId = "752456876739-gcngoh8smdobf2mh16vj75shp0e66h67.apps.googleusercontent.com"
                 )
             )
             authReady = true
-            // Optional: Load token if not using Flow in ViewModel's init
-            // viewModel.onEvent(LoginUiEvent.LoadToken)
         }
 
         LaunchedEffect(state.isLoggedIn, state.isLoading) {
-            // Nawiguj tylko jeśli użytkownik jest zalogowany ORAZ ładowanie się zakończyło
             if (state.isLoggedIn && !state.isLoading) {
-                println("Token znaleziony (isLoggedIn=true), nawigacja do ScaffoldingScreen...")
-                // Użyj replace, aby usunąć LoginScreen ze stosu nawigacji
-                // (użytkownik nie wróci "wstecz" do ekranu logowania)
+                println("Potwierdzono logowanie z backendem, nawigacja do ScaffoldingScreen...")
                 navigator.replace(ScaffoldingScreen())
-                // Alternatywnie użyj push, jeśli chcesz umożliwić powrót:
-                // navigator.push(ScaffoldingScreen())
             }
         }
 
@@ -92,7 +69,6 @@ class LoginScreen : Screen {
             }
 
             // --- Google Sign-In Button ---
-            // Show only if auth is ready AND user is not already logged in (has saved token)
             if (authReady && !state.isLoggedIn) {
                 Box(contentAlignment = Alignment.Center) {
                     GoogleButtonUiContainer(
@@ -100,27 +76,24 @@ class LoginScreen : Screen {
                             val token = googleUser?.idToken
                             if (token != null) {
                                 println("Google Sign-In Success - TOKEN ID: $token")
-                                // Send SaveToken event to ViewModel
                                 viewModel.onEvent(LoginUiEvent.SaveToken(token))
-                                // Optionally navigate immediately after saving token?
-                                // navigator.push(ScaffoldingScreen())
+                                println("Validating token...")
+                                viewModel.onEvent(LoginUiEvent.ValidateToken(token))
                             } else {
-                                // Show UI error if Google Sign-In itself failed
                                 uiErrorMessage = "Google Sign-In failed: Token is null."
                                 println("Google Sign-In failed: Token is null.")
                             }
                         }
                     ) { // The content of the container is the button
                         GoogleSignInButton(
-                            onClick = { this.onClick() } // Trigger the container's internal logic
+                            onClick = { this.onClick() }
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp)) // Add space after button
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
             // --- Authenticate/Proceed Button ---
-            // Show if logged in (token exists in state)
             if (state.isLoggedIn) {
                 Text("Logged in with token: ${state.savedToken?.take(10)}...") // Show partial token for confirmation
                 Spacer(modifier = Modifier.height(8.dp))
@@ -165,13 +138,9 @@ class LoginScreen : Screen {
                     onDismissRequest = { /* Maybe add ViewModel event to clear error */ },
                     title = { Text("Error") },
                     text = { Text(it) },
-                    confirmButton = { Button(onClick = { /* ViewModel event to clear error */ }) { Text("OK") } }
+                    confirmButton = { Button(onClick = { viewModel.onEvent(LoginUiEvent.HideError) }) { Text("OK") } }
                 )
             }
         }
     }
-
-    // Remove the Garbage() function if no longer needed
-    // @Composable
-    // fun Garbage() { ... }
 }
