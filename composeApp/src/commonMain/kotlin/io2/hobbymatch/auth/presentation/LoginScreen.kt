@@ -1,4 +1,4 @@
-package io2.hobbymatch.login.presentation
+package io2.hobbymatch.auth.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

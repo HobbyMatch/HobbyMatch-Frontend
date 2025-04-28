@@ -1,4 +1,4 @@
-package io2.hobbymatch.login.presentation
+package io2.hobbymatch.auth.presentation
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
@@ -11,8 +11,8 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
-import io2.hobbymatch.login.data.local.realm.LoginMongoDB
-import io2.hobbymatch.login.domain.AuthResponse
+import io2.hobbymatch.auth.data.local.realm.LoginMongoDB
+import io2.hobbymatch.auth.domain.AuthResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

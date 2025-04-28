@@ -1,4 +1,4 @@
-package io2.hobbymatch.login.domain
+package io2.hobbymatch.auth.domain
 
 import kotlinx.serialization.Serializable
 

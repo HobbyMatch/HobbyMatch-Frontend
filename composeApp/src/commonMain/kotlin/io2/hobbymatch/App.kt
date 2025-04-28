@@ -8,9 +8,9 @@ import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
 import io2.hobbymatch.activity.presentation.ActivityViewModel
-import io2.hobbymatch.login.data.local.realm.LoginMongoDB
-import io2.hobbymatch.login.presentation.LoginScreen
-import io2.hobbymatch.login.presentation.LoginViewModel
+import io2.hobbymatch.auth.data.local.realm.LoginMongoDB
+import io2.hobbymatch.auth.presentation.LoginScreen
+import io2.hobbymatch.auth.presentation.LoginViewModel
 import io2.hobbymatch.ui.theme.darkScheme
 import io2.hobbymatch.ui.theme.lightScheme
 import io2.hobbymatch.user.data.local.realm.UserMongoDB
