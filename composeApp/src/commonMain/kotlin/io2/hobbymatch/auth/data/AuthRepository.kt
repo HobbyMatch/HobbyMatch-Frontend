@@ -31,6 +31,12 @@ class AuthRepository(
         return response
     }
 
+    // Save token to local storage
+    suspend fun saveToken(token: String) {
+        loginMongoDB.saveLoginToken(token)
+    }
+
+
     // Get the currently stored token
     suspend fun loadToken(): String? {
         return loginMongoDB.loadLoginToken()

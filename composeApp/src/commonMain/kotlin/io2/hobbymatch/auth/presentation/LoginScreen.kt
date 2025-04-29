@@ -33,6 +33,8 @@ import io2.hobbymatch.utils.navigation.ScaffoldingScreen
 class LoginScreen : Screen {
     @Composable
     override fun Content() {
+        val isMockMode = true // DEBUG PURPOSES ONLY
+
         val navigator = LocalNavigator.currentOrThrow
         val viewModel = koinScreenModel<LoginViewModel>()
         val state by viewModel.state.collectAsState()
@@ -73,7 +75,8 @@ class LoginScreen : Screen {
                 Box(contentAlignment = Alignment.Center) {
                     GoogleButtonUiContainer(
                         onGoogleSignInResult = { googleUser ->
-                            val token = googleUser?.idToken
+                            // val token = googleUser?.idToken
+                            val token = if(isMockMode) "mock_token" else googleUser?.idToken // DEBUG PURPOSES ONLY
                             if (token != null) {
                                 println("Google Sign-In Success - TOKEN ID: $token")
                                 viewModel.onEvent(LoginUiEvent.SaveToken(token))

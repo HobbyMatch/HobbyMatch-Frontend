@@ -225,29 +225,21 @@ class LoginViewModel(private val authRepository: AuthRepository) : ScreenModel {
         }
     }
 
-    // Function to save a new token
+    // Save the token to local storage
     private fun saveToken(token: String) {
         screenModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
             try {
-                authRepository.loginWithGoogle(token) // Save token via repository
-                _state.update {
-                    it.copy(
-                        savedToken = token,
-                        isLoading = false,
-                        isError = false,
-                        errorMessage = null,
-                        isLoggedIn = true
-                    )
-                }
+                authRepository.saveToken(token)
+                _state.update { it.copy(savedToken = token) }
+                println("Token saved successfully: $token")
             } catch (e: Exception) {
                 _state.update {
                     it.copy(
-                        isLoading = false,
                         isError = true,
                         errorMessage = "Failed to save token: ${e.message}"
                     )
                 }
+                println("Failed to save token: ${e.message}")
             }
         }
     }

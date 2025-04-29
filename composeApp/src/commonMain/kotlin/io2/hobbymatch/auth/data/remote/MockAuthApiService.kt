@@ -31,13 +31,13 @@ class MockAuthApiService : AuthApiService {
     )
 
     private val mockTokens = AuthResponse(
-        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwibmFtZSI6IkphbiBLb3dhbHNraSIsImlhdCI6MTY3NTEyMzQ1Nn0.7fC0d4-oJ6VQR8K8H2ZHGwXH6PJACMjwR7qVGOfte50"
+        token = "mock_token"
     )
 
     override suspend fun refreshToken(request: RefreshTokenRequest): AuthResponse {
         delay(mockDelay)
         return mockTokens.copy(
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwibmFtZSI6IkphbiBLb3dhbHNraSIsImlhdCI6MTY3NTEyMzQ1Nn0.7fC0d4-oJ6VQR8K8H2ZHGwXH6PJACMjwR7qVGOfte50"
+            token = "mock_token"
         )
     }
 
