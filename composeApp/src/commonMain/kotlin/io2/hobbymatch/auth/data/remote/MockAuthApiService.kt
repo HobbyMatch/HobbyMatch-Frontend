@@ -10,6 +10,15 @@ import kotlinx.coroutines.delay
 class MockAuthApiService : AuthApiService {
     private val mockDelay = 500L // Simulate network delay
 
+    override suspend fun validateIdToken(token: String): AuthResponse {
+        if (token == mockTokens.token) {
+            return mockTokens
+        } else {
+            throw IllegalArgumentException("Invalid token")
+        }
+    }
+
+
     private val mockUserInfo = UserInfo(
         id = "user123",
         name = "Jan Kowalski",

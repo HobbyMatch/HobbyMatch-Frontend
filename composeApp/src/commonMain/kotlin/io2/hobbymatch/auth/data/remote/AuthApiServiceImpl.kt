@@ -18,6 +18,17 @@ class AuthApiServiceImpl(
     private val httpClient: HttpClient,
     private val apiConfig: ApiConfig
 ) : AuthApiService {
+    override suspend fun validateIdToken(token: String): AuthResponse {
+        val body = mapOf("idToken" to token)
+
+        return httpClient.post {
+            url(apiConfig.getEndpoint(AuthApiEndpoints.GOOGLE_LOGIN)) // Example: Add the validation endpoint
+            contentType(ContentType.Application.Json)
+            setBody(body)
+        }.body() // Parse the response body into an AuthResponse
+    }
+
+
     override suspend fun refreshToken(request: RefreshTokenRequest): AuthResponse {
         return httpClient.post {
             url(apiConfig.getEndpoint(AuthApiEndpoints.REFRESH))
