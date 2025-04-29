@@ -34,7 +34,6 @@ class LoginMongoDB {
         }
     }
 
-    // --- Save Login Token ---
     suspend fun saveLoginToken(token: String) {
         val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
         withContext(Dispatchers.IO) {
@@ -56,7 +55,6 @@ class LoginMongoDB {
         }
     }
 
-    // --- Save Login Token ---
     suspend fun saveJwtToken(jwtToken: String) {
         val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
         withContext(Dispatchers.IO) {
