@@ -1,4 +1,4 @@
-package io2.hobbymatch.login.data.local.realm
+package io2.hobbymatch.auth.data.local.realm
 
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
@@ -34,7 +34,6 @@ class LoginMongoDB {
         }
     }
 
-    // --- Save Login Token ---
     suspend fun saveLoginToken(token: String) {
         val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
         withContext(Dispatchers.IO) {
@@ -56,7 +55,6 @@ class LoginMongoDB {
         }
     }
 
-    // --- Save Login Token ---
     suspend fun saveJwtToken(jwtToken: String) {
         val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
         withContext(Dispatchers.IO) {

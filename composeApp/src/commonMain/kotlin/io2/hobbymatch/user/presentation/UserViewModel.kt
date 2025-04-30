@@ -3,7 +3,7 @@ package io2.hobbymatch.user.presentation
 // Import ScreenModel and screenModelScope
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import io2.hobbymatch.login.data.local.realm.LoginMongoDB
+import io2.hobbymatch.auth.data.local.realm.LoginMongoDB
 import io2.hobbymatch.user.data.local.realm.UserMongoDB
 import io2.hobbymatch.user.data.local.realm.UserProfileRealm
 import kotlinx.coroutines.flow.MutableStateFlow
