@@ -10,7 +10,7 @@ import io.ktor.client.request.headers
 import io.ktor.serialization.kotlinx.json.json
 import io2.hobbymatch.activity.domain.Activity
 import io2.hobbymatch.activity.domain.Hobby
-import io2.hobbymatch.login.data.local.realm.LoginMongoDB
+import io2.hobbymatch.auth.data.local.realm.LoginMongoDB
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

@@ -1,4 +1,4 @@
-package io2.hobbymatch.login.data.local.realm
+package io2.hobbymatch.auth.data.local.realm
 
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
