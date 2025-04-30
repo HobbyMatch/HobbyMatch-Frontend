@@ -35,6 +35,7 @@ class LoginScreen : Screen {
     override fun Content() {
         val isMockMode = true // DEBUG PURPOSES ONLY
 
+
         val navigator = LocalNavigator.currentOrThrow
         val viewModel = koinScreenModel<LoginViewModel>()
         val state by viewModel.state.collectAsState()
