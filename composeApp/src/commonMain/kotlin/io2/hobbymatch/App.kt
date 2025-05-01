@@ -22,7 +22,7 @@ import io2.hobbymatch.network.ApiConfig
 import io2.hobbymatch.ui.theme.darkScheme
 import io2.hobbymatch.ui.theme.lightScheme
 import io2.hobbymatch.user.data.local.realm.UserMongoDB
-import io2.hobbymatch.user.presentation.UserViewModel
+// import io2.hobbymatch.user.presentation.UserViewModel
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.core.context.startKoin
@@ -77,7 +77,7 @@ val appModule = module {
     single { AuthRepository(get(), get<LoginMongoDB>()) }
 
     // Provide ViewModels
-    factory { UserViewModel(get<UserMongoDB>(), get<LoginMongoDB>()) }
+    // factory { UserViewModel(get<UserMongoDB>(), get<LoginMongoDB>()) }
     factory { LoginViewModel(get<AuthRepository>()) }
     factory { ActivityViewModel(get<LoginMongoDB>()) }
 }

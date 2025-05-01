@@ -47,12 +47,8 @@ class UserMongoDB {
                     // Find the managed version of the existing profile to update
                     findLatest(existingProfile)?.apply {
                         email = userProfileData.email
-                        username = userProfileData.username
                         name = userProfileData.name
-                        surname = userProfileData.surname
-                        birthday = userProfileData.birthday
-                        gender = userProfileData.gender
-                        bio = userProfileData.bio
+                        id = userProfileData.id
                         // Update hobbies list: Clear existing and add current ones
                         hobbies.clear()
                         hobbies.addAll(userProfileData.hobbies)
