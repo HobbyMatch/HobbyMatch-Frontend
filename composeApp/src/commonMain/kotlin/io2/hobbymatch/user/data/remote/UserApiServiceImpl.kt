@@ -9,6 +9,7 @@ import io.ktor.client.request.url
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io2.hobbymatch.network.ApiConfig
+import io2.hobbymatch.user.domain.UpdateUserRequest
 import io2.hobbymatch.user.domain.User
 
 class UserApiServiceImpl(
@@ -28,19 +29,19 @@ class UserApiServiceImpl(
         }.body()
     }
 
-    override suspend fun updateAuthenticatedUser(user: User) {
-        httpClient.put {
+    override suspend fun updateAuthenticatedUser(requestBody: UpdateUserRequest): User {
+        return httpClient.put {
             url(apiConfig.getEndpoint(UserApiEndpoints.UPDATE_ME))
             contentType(ContentType.Application.Json)
-            setBody(user)
-        }
+            setBody(requestBody)
+        }.body()
     }
 
-    override suspend fun updateUser(userId: String, user: User) {
-        httpClient.put {
+    override suspend fun updateUser(userId: String, requestBody: UpdateUserRequest): User {
+        return httpClient.put {
             url(apiConfig.getEndpoint(UserApiEndpoints.UPDATE_USER.replace("{userId}", userId)))
             contentType(ContentType.Application.Json)
-            setBody(user)
-        }
+            setBody(requestBody)
+        }.body()
     }
 }

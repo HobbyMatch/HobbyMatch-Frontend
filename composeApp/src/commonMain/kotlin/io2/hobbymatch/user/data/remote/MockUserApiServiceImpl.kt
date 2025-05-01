@@ -1,13 +1,13 @@
 package io2.hobbymatch.user.data.remote
 
 import io2.hobbymatch.user.domain.Hobby
+import io2.hobbymatch.user.domain.UpdateUserRequest
 import io2.hobbymatch.user.domain.User
 import kotlinx.coroutines.delay
 
 class MockUserApiService : UserApiService {
 
-    // Mock data for testing
-    private val mockAuthenticatedUser = User(
+    private var mockAuthenticatedUser = User(
         id = "1",
         name = "John Doe",
         email = "john.doe@example.com",
@@ -30,7 +30,7 @@ class MockUserApiService : UserApiService {
     )
 
     override suspend fun getAuthenticatedUser(): User {
-        delay(500) // Simulate network delay for realistic behavior
+        delay(500) // Simulate network delay
         return mockAuthenticatedUser
     }
 
@@ -39,24 +39,29 @@ class MockUserApiService : UserApiService {
         return mockUsers[userId] ?: throw IllegalArgumentException("User with ID $userId not found.")
     }
 
-    override suspend fun updateAuthenticatedUser(user: User) {
+    override suspend fun updateAuthenticatedUser(requestBody: UpdateUserRequest): User {
         delay(500) // Simulate network delay
-        // Mock update: overwrite the authenticated user
-        mockAuthenticatedUser.apply {
-            name = user.name
-            email = user.email
-            hobbies = user.hobbies
-        }
+        mockAuthenticatedUser = mockAuthenticatedUser.copy(
+            name = requestBody.name,
+            email = requestBody.email,
+            hobbies = requestBody.hobbies
+        )
+        return mockAuthenticatedUser
     }
 
-    override suspend fun updateUser(userId: String, user: User) {
+    override suspend fun updateUser(userId: String, requestBody: UpdateUserRequest): User {
         delay(500) // Simulate network delay
-        if (mockUsers.containsKey(userId)) {
-            // Update the existing user
-            mockUsers[userId] = user
-        } else {
-            // Add a new user if it doesn't exist
-            mockUsers[userId] = user
-        }
+        val updatedUser = mockUsers[userId]?.copy(
+            name = requestBody.name,
+            email = requestBody.email,
+            hobbies = requestBody.hobbies
+        ) ?: User(
+            id = userId,
+            name = requestBody.name,
+            email = requestBody.email,
+            hobbies = requestBody.hobbies
+        )
+        mockUsers[userId] = updatedUser
+        return updatedUser
     }
 }
