@@ -23,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,10 +33,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
-import io2.hobbymatch.user.domain.Hobby
-import io2.hobbymatch.user.domain.User
 
 class UserScreen : Screen, Tab {
 
@@ -56,12 +56,12 @@ class UserScreen : Screen, Tab {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
     @Composable
     override fun Content() {
-        // Placeholder: Simulate user data
-        var user by remember { mutableStateOf(User("example@example.com", listOf(Hobby("Reading"), Hobby("Gaming")), "1", "John Doe")) }
-        var userName by remember { mutableStateOf(user.name) }
-        var userEmail by remember { mutableStateOf(user.email) }
-        var userHobbies by remember { mutableStateOf(user.hobbies.map { it.name }) }
+        // Access UserViewModel via the screenModelScope or dependency injection
+        val viewModel = koinScreenModel<UserViewModel>()
+        val state = viewModel.state.collectAsState().value
+
         val scrollState = rememberScrollState()
+        var newHobby by remember { mutableStateOf("") }
 
         Scaffold(
             topBar = {
@@ -81,10 +81,20 @@ class UserScreen : Screen, Tab {
                 ) {
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    // Show error message if any
+                    if (state.isError) {
+                        Text(
+                            text = state.errorMessage ?: "An error occurred.",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                    }
+
                     // Name Input Field
                     OutlinedTextField(
-                        value = userName,
-                        onValueChange = { userName = it },
+                        value = state.name,
+                        onValueChange = { viewModel.onEvent(UserUiEvent.EnterName(it)) },
                         label = { Text("Name") },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -93,8 +103,8 @@ class UserScreen : Screen, Tab {
 
                     // Email Input Field
                     OutlinedTextField(
-                        value = userEmail,
-                        onValueChange = { userEmail = it },
+                        value = state.email,
+                        onValueChange = { viewModel.onEvent(UserUiEvent.EnterEmail(it)) },
                         label = { Text("Email") },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -110,20 +120,20 @@ class UserScreen : Screen, Tab {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        userHobbies.forEach { hobby ->
+                        state.hobbies.forEach { hobby ->
                             InputChip(
                                 selected = false,
-                                onClick = { /* Handle click */ },
-                                label = { Text(text = hobby) }
+                                onClick = {
+                                    viewModel.onEvent(UserUiEvent.RemoveHobby(hobby.name))
+                                },
+                                label = { Text(text = hobby.name) }
                             )
                         }
                     }
 
-
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Add New Hobby Section
-                    var newHobby by remember { mutableStateOf("") }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -139,7 +149,7 @@ class UserScreen : Screen, Tab {
                         Button(
                             onClick = {
                                 if (newHobby.isNotBlank()) {
-                                    userHobbies = userHobbies + newHobby
+                                    viewModel.onEvent(UserUiEvent.AddHobby(newHobby))
                                     newHobby = ""
                                 }
                             }
@@ -153,16 +163,16 @@ class UserScreen : Screen, Tab {
                     // Save Changes Button
                     Button(
                         onClick = {
-                            // Update user state with new values
-                            user = user.copy(
-                                name = userName,
-                                email = userEmail,
-                                hobbies = userHobbies.map { Hobby(it) }
-                            )
+                            viewModel.onEvent(UserUiEvent.Save)
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !state.isLoading // Disable button when loading
                     ) {
-                        Text("Save Changes")
+                        if (state.isLoading) {
+                            Text("Saving...")
+                        } else {
+                            Text("Save Changes")
+                        }
                     }
                 }
             }
