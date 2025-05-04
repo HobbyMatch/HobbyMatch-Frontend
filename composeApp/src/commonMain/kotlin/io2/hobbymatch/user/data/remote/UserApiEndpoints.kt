@@ -1,4 +1,4 @@
-package io2.hobbymatch.network.endpoints
+package io2.hobbymatch.user.data.remote
 
 object UserApiEndpoints {
     const val BASE_PATH = "users"

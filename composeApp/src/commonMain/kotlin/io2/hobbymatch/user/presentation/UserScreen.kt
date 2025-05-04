@@ -9,20 +9,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -38,12 +31,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 
@@ -63,194 +53,129 @@ class UserScreen : Screen, Tab {
             }
         }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) // Needed for FlowRow and InputChip
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
     @Composable
     override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+        // Access UserViewModel via the screenModelScope or dependency injection
         val viewModel = koinScreenModel<UserViewModel>()
+        val state = viewModel.state.collectAsState().value
 
-        val state by viewModel.state.collectAsState()
-
-        // Temporary state for the "Add Hobby" TextField
-        var newHobbyText by remember { mutableStateOf("") }
         val scrollState = rememberScrollState()
-        val keyboardController = LocalSoftwareKeyboardController.current // <-- Get the controller
+        var newHobby by remember { mutableStateOf("") }
 
-        Scaffold( // Optional: Provides basic layout structure
+        Scaffold(
             topBar = {
-                TopAppBar(title = { Text("User Profile") }) // Example TopAppBar
-            }
-        ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues) // Apply padding from Scaffold
-                     //.imePadding()
-                    .padding(horizontal = 16.dp) // Add horizontal padding
-                    .verticalScroll(scrollState), // Make content scrollable
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                // --- Loading Indicator ---
-                if (state.isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.padding(vertical = 16.dp))
-                }
-
-                // --- Error Message ---
-                if (state.isError && state.errorMessage != null) {
-                    Text(
-                        text = state.errorMessage!!,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                }
-
-                // --- Input Fields ---
-                OutlinedTextField(
-                    value = state.email,
-                    onValueChange = { viewModel.onEvent(UserUiEvent.EnterEmail(it)) },
-                    label = { Text("Email") },
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    enabled = !state.isLoading,
-                    singleLine = true
+                TopAppBar(
+                    title = { Text("User Profile") }
                 )
+            },
+            content = { innerPadding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
+                        .padding(innerPadding)
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                OutlinedTextField(
-                    value = state.username,
-                    onValueChange = { viewModel.onEvent(UserUiEvent.EnterUsername(it)) },
-                    label = { Text("Username") },
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    enabled = !state.isLoading,
-                    singleLine = true
-                )
+                    // Show error message if any
+                    if (state.isError) {
+                        Text(
+                            text = state.errorMessage ?: "An error occurred.",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                    }
 
-                Row(Modifier.fillMaxWidth()) {
+                    // Name Input Field
                     OutlinedTextField(
                         value = state.name,
                         onValueChange = { viewModel.onEvent(UserUiEvent.EnterName(it)) },
                         label = { Text("Name") },
-                        modifier = Modifier.weight(1f).padding(end = 4.dp, top = 4.dp, bottom = 4.dp),
-                        enabled = !state.isLoading,
-                        singleLine = true
+                        modifier = Modifier.fillMaxWidth()
                     )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Email Input Field
                     OutlinedTextField(
-                        value = state.surname,
-                        onValueChange = { viewModel.onEvent(UserUiEvent.EnterSurname(it)) },
-                        label = { Text("Surname") },
-                        modifier = Modifier.weight(1f).padding(start = 4.dp, top = 4.dp, bottom = 4.dp),
-                        enabled = !state.isLoading,
-                        singleLine = true
+                        value = state.email,
+                        onValueChange = { viewModel.onEvent(UserUiEvent.EnterEmail(it)) },
+                        label = { Text("Email") },
+                        modifier = Modifier.fillMaxWidth()
                     )
-                }
 
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                OutlinedTextField(
-                    value = state.birthday,
-                    onValueChange = { viewModel.onEvent(UserUiEvent.EnterBirthday(it)) },
-                    label = { Text("Birthday (YYYY-MM-DD)") }, // Placeholder format
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    enabled = !state.isLoading,
-                    singleLine = true
-                    // Consider using a DatePickerDialog here for better UX
-                )
+                    // Hobbies Section
+                    Text("Hobbies", style = MaterialTheme.typography.titleMedium)
 
-                OutlinedTextField(
-                    value = state.bio,
-                    onValueChange = { viewModel.onEvent(UserUiEvent.EnterBio(it)) },
-                    label = { Text("Bio") },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 80.dp).padding(vertical = 4.dp),
-                    enabled = !state.isLoading,
-                )
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                // --- Hobbies Section ---
-                Spacer(modifier = Modifier.height(12.dp))
-                Text("Hobbies", style = MaterialTheme.typography.titleMedium)
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        state.hobbies.forEach { hobby ->
+                            InputChip(
+                                selected = false,
+                                onClick = {
+                                    viewModel.onEvent(UserUiEvent.RemoveHobby(hobby.name))
+                                },
+                                label = { Text(text = hobby.name) }
+                            )
+                        }
+                    }
 
-                // Display existing hobbies
-                FlowRow( // Arranges chips that wrap to the next line
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    state.hobbies.forEach { hobby ->
-                        InputChip(
-                            selected = false, // Not selectable in this context
-                            onClick = { /* No action needed on click */ },
-                            label = { Text(hobby) },
-                            enabled = !state.isLoading,
-                            trailingIcon = {
-                                IconButton(
-                                    onClick = { viewModel.onEvent(UserUiEvent.RemoveHobby(hobby)) },
-                                    modifier = Modifier.size(18.dp), // Make icon smaller
-                                    enabled = !state.isLoading
-                                ) {
-                                    Icon(Icons.Default.Close, contentDescription = "Remove hobby $hobby")
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Add New Hobby Section
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = newHobby,
+                            onValueChange = { newHobby = it },
+                            label = { Text("Add Hobby") },
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        Button(
+                            onClick = {
+                                if (newHobby.isNotBlank()) {
+                                    viewModel.onEvent(UserUiEvent.AddHobby(newHobby))
+                                    newHobby = ""
                                 }
                             }
-                        )
+                        ) {
+                            Text("Add")
+                        }
                     }
-                }
 
-                // Add new hobby input
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    OutlinedTextField(
-                        value = newHobbyText,
-                        onValueChange = { newHobbyText = it },
-                        label = { Text("Add Hobby") },
-                        modifier = Modifier.weight(1f),
-                        enabled = !state.isLoading,
-                        singleLine = true
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Save Changes Button
                     Button(
                         onClick = {
-                            viewModel.onEvent(UserUiEvent.AddHobby(newHobbyText))
-                            newHobbyText = "" // Clear input field after adding
+                            viewModel.onEvent(UserUiEvent.Save)
                         },
-                        enabled = !state.isLoading && newHobbyText.isNotBlank()
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !state.isLoading // Disable button when loading
                     ) {
-                        Text("Add")
+                        if (state.isLoading) {
+                            Text("Saving...")
+                        } else {
+                            Text("Save Changes")
+                        }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // --- Save Button ---
-                Button(
-                    onClick = {
-                        viewModel.onEvent(UserUiEvent.Save)
-                        keyboardController?.hide() // <-- Hide keyboard
-                    },
-                    enabled = !state.isLoading, // Disable button while loading/saving
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
-                ) {
-                    Text("Save Profile")
-                }
-
-                // --- Logout / Reset Token Button ---
-                Button(
-                    onClick = {
-                        // Send the ResetToken event to the ViewModel
-                        viewModel.onEvent(UserUiEvent.ResetToken)
-                        // Consider navigating away after triggering reset,
-                        // perhaps back to LoginScreen. This logic might belong
-                        // higher up (e.g., observing auth state in App.kt or Scaffolding).
-                        // navigator.popUntilRoot() // Example: Go back to the initial screen
-                    },
-                    enabled = !state.isLoading, // Disable while loading/saving/logging out
-                    modifier = Modifier.fillMaxWidth()
-                    // Optional: Style as a destructive action
-                    // colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text("Logout (Reset Token)")
-                }
-
-                Spacer(modifier = Modifier.height(8.dp)) // Space between buttons
-
             }
-        }
+        )
     }
 }
