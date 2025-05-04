@@ -103,7 +103,7 @@ fun ActivityItem(activity: Activity) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = activity.title, style = MaterialTheme.typography.titleMedium)
             Text(text = activity.description ?: "No description", style = MaterialTheme.typography.bodyMedium)
-            Text(text = "Organizer: ${activity.organizer.username}", style = MaterialTheme.typography.bodySmall)
+            Text(text = "Organizer: ${activity.organizer.name}", style = MaterialTheme.typography.bodySmall)
         }
     }
 }

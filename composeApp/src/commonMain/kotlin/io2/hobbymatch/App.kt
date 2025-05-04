@@ -21,17 +21,24 @@ import io2.hobbymatch.auth.presentation.LoginViewModel
 import io2.hobbymatch.network.ApiConfig
 import io2.hobbymatch.ui.theme.darkScheme
 import io2.hobbymatch.ui.theme.lightScheme
+import io2.hobbymatch.user.data.UserRepository
 import io2.hobbymatch.user.data.local.realm.UserMongoDB
+import io2.hobbymatch.user.data.remote.MockUserApiService
+import io2.hobbymatch.user.data.remote.UserApiService
 import io2.hobbymatch.user.presentation.UserViewModel
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.core.annotation.KoinInternalApi
 import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
 import org.koin.dsl.module
 
+@OptIn(KoinInternalApi::class)
 @Composable
 @Preview
 fun App() {
     initializeKoin()
+    println(appModule.includedModules)
 
     // Set up the theme based on the system settings
     val colors by mutableStateOf(
@@ -46,45 +53,50 @@ fun App() {
 }
 
 val appModule = module {
-    // Register Realm DB instances as singletons
-    single { UserMongoDB() }
-    single { LoginMongoDB() }
+    // Provide Realm Database instances as singletons
+    single { UserMongoDB() } // For user-related local data
+    single { LoginMongoDB() } // For authentication-related local data
 
-    // Provide ApiConfig for endpoint management
-    single {
-        ApiConfig.DEVELOPMENT
-    }
+    // Provide API configuration
+    single { ApiConfig.DEVELOPMENT }
 
-    // Provide HttpClient for networking
+    // Provide HttpClient for network operations
     single {
         HttpClient {
             install(ContentNegotiation) {
-                json(Json {
-                    ignoreUnknownKeys = true
-                    isLenient = true
-                })
+                json(
+                    Json {
+                        ignoreUnknownKeys = true
+                        isLenient = true
+                    }
+                )
             }
             install(HttpTimeout) {
-                requestTimeoutMillis = 1000L
+                requestTimeoutMillis = 10_000L
             }
         }
     }
 
-    // Provide AuthApiService implementation
+    // Bind User API Service (use MockUserApiService for now)
+    single<UserApiService> { MockUserApiService() }
+
+    // Provide UserRepository (used by UserViewModel)
+    single { UserRepository(get<UserApiService>(), get<UserMongoDB>()) }
+
+    // Provide Auth-related dependencies
     single<AuthApiService> { MockAuthApiService() }
+    single { AuthRepository(get<AuthApiService>(), get<LoginMongoDB>()) }
 
-    // Provide AuthRepository with its required dependencies
-    single { AuthRepository(get(), get<LoginMongoDB>()) }
-
-    // Provide ViewModels
-    factory { UserViewModel(get<UserMongoDB>(), get<LoginMongoDB>()) }
-    factory { LoginViewModel(get<AuthRepository>()) }
-    factory { ActivityViewModel(get<LoginMongoDB>()) }
+    // Register ViewModels
+    factory { UserViewModel(get<UserRepository>()) } // ViewModel for the user screen
+    factory { LoginViewModel(get<AuthRepository>()) } // ViewModel for login
+    factory { ActivityViewModel(get<LoginMongoDB>()) } // ViewModel for activity
 }
-
 
 fun initializeKoin() {
     startKoin {
+        printLogger(level = Level.DEBUG)
         modules(appModule)
     }
 }
+
