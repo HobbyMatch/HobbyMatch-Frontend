@@ -21,13 +21,36 @@ class UserMongoDB {
     private fun configureRealm() {
         if (realm == null || realm!!.isClosed()) {
             val config = RealmConfiguration.Builder(
-                schema = setOf(UserProfileRealm::class, HobbyRealm::class) // Ensure both `UserProfileRealm` and `HobbyRealm` are part of the schema
+                schema = setOf(UserProfileRealm::class, HobbyRealm::class)
             )
+                .schemaVersion(2) // Increment this when schema changes
+                .deleteRealmIfMigrationNeeded() // For development, will delete old data
+                // Alternative for production: use migration
+                /*.migration { dynamicRealm, oldVersion, newVersion ->
+                    val schema = dynamicRealm.schema
+
+                    if (oldVersion == 1L) {
+                        schema.get("UserProfileRealm")?.apply {
+                            // Transform hobbies property
+                            transform { obj ->
+                                // Migration logic here if needed
+                            }
+                        }
+                    }
+                }*/
                 .compactOnLaunch()
                 .build()
-            realm = Realm.open(config)
+
+            try {
+                realm = Realm.open(config)
+            } catch (e: Exception) {
+                // If opening fails, delete and recreate database (development only)
+                Realm.deleteRealm(config)
+                realm = Realm.open(config)
+            }
         }
     }
+
 
     /**
      * Save the user profile into Realm, updating existing entries or creating new ones.

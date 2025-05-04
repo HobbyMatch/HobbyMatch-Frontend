@@ -26,16 +26,19 @@ import io2.hobbymatch.user.data.local.realm.UserMongoDB
 import io2.hobbymatch.user.data.remote.MockUserApiService
 import io2.hobbymatch.user.data.remote.UserApiService
 import io2.hobbymatch.user.presentation.UserViewModel
-// import io2.hobbymatch.user.presentation.UserViewModel
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.core.annotation.KoinInternalApi
 import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
 import org.koin.dsl.module
 
+@OptIn(KoinInternalApi::class)
 @Composable
 @Preview
 fun App() {
     initializeKoin()
+    println(appModule.includedModules)
 
     // Set up the theme based on the system settings
     val colors by mutableStateOf(
@@ -92,6 +95,8 @@ val appModule = module {
 
 fun initializeKoin() {
     startKoin {
+        printLogger(level = Level.DEBUG)
         modules(appModule)
     }
 }
+
