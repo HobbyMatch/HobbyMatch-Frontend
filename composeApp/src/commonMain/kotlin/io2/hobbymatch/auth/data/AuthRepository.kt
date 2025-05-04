@@ -11,7 +11,7 @@ class AuthRepository(
     private val loginMongoDB: LoginMongoDB
 ) {
     suspend fun validateToken(token: String, role: String = "USER"): AuthResponse {
-        return authApiService.validateGoogleIdToken(token)
+        return authApiService.validateGoogleIdToken(token, role = role)
     }
 
     // Login with Google and store token locally

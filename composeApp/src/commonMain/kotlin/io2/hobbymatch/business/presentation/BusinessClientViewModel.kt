@@ -1,11 +1,11 @@
 package io2.hobbymatch.business.presentation
 
 import cafe.adriel.voyager.core.model.ScreenModel
-import io2.hobbymatch.business.data.BusinessClientRepository
 import io2.hobbymatch.business.domain.Venue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 data class BusinessClientScreenState(
     val email: String = "",
@@ -26,7 +26,7 @@ sealed class BusinessClientUiEvent {
 }
 
 class BusinessClientViewModel(
-    private val repository: BusinessClientRepository
+    //private val repository: BusinessClientRepository
 ) : ScreenModel {
 
     private val _state = MutableStateFlow(BusinessClientScreenState())
@@ -36,7 +36,27 @@ class BusinessClientViewModel(
         loadBusinessClientProfile()
     }
 
+    fun onEvent(event: BusinessClientUiEvent) {
+        when (event) {
+            is BusinessClientUiEvent.EnterEmail -> {
+                _state.update { it.copy(email = event.email) }
+            }
+            is BusinessClientUiEvent.EnterName -> {
+                _state.update { it.copy(name = event.name) }
+            }
+            is BusinessClientUiEvent.AddVenue -> {
+                // Implement adding venue logic
+            }
+            is BusinessClientUiEvent.RemoveVenue -> {
+                // Implement removing venue logic
+            }
+            is BusinessClientUiEvent.Save -> {
+                // Implement save logic
+            }
+        }
+    }
+
     private fun loadBusinessClientProfile() {
-        TODO("Not yet implemented")
+
     }
 }

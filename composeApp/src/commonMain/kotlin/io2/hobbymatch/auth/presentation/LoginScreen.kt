@@ -286,7 +286,7 @@ class LoginScreen : Screen {
                     // Logowanie jako zwykły użytkownik
                     GoogleButtonUiContainer(
                         onGoogleSignInResult = { googleUser ->
-                            val token = if (isMockMode) "mock_token" else googleUser?.idToken
+                            val token = if (isMockMode) "mock_access_token" else googleUser?.idToken
                             if (token != null) {
                                 viewModel.onEvent(LoginUiEvent.SaveToken(token))
                                 viewModel.onEvent(LoginUiEvent.ValidateToken(token))
@@ -313,7 +313,7 @@ class LoginScreen : Screen {
 
                     GoogleButtonUiContainer(
                         onGoogleSignInResult = { googleUser ->
-                            val token = if (isMockMode) "mock_token" else googleUser?.idToken
+                            val token = if (isMockMode) "mock_access_token" else googleUser?.idToken
                             if (token != null) {
                                 viewModel.onEvent(LoginUiEvent.SaveToken(token))
                                 viewModel.onEvent(LoginUiEvent.ValidateBusinessClientToken(token))
