@@ -2,6 +2,7 @@ package io2.hobbymatch.user.presentation
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import io2.hobbymatch.auth.data.AuthRepository
 import io2.hobbymatch.user.data.UserRepository
 import io2.hobbymatch.user.domain.Hobby
 import io2.hobbymatch.user.domain.User
@@ -29,10 +30,12 @@ sealed class UserUiEvent {
     data class AddHobby(val hobby: String) : UserUiEvent()
     data class RemoveHobby(val hobby: String) : UserUiEvent()
     data object Save : UserUiEvent()
+    data object Logout : UserUiEvent()
 }
 
 class UserViewModel(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val authRepository: AuthRepository
 ) : ScreenModel {
 
     private val _state = MutableStateFlow(UserScreenState())
@@ -94,6 +97,13 @@ class UserViewModel(
             }
             is UserUiEvent.Save -> {
                 saveUserProfile()
+            }
+
+            UserUiEvent.Logout -> {
+                screenModelScope.launch {
+                    authRepository.logout()
+                    _state.update { it.copy(isLoggedIn = false) }
+                }
             }
         }
     }

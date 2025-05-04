@@ -10,14 +10,14 @@ class AuthRepository(
     private val authApiService: AuthApiService,
     private val loginMongoDB: LoginMongoDB
 ) {
-    suspend fun validateToken(token: String): AuthResponse {
+    suspend fun validateToken(token: String, role: String = "user"): AuthResponse {
         return authApiService.validateGoogleIdToken(token)
     }
 
     // Login with Google and store token locally
     suspend fun loginWithGoogle(idToken: String): AuthResponse {
         val response = authApiService.googleLogin(GoogleLoginRequest(idToken))
-        loginMongoDB.saveLoginToken(response.token)
+        loginMongoDB.saveLoginToken(response.accessToken)
         return response
     }
 
@@ -27,7 +27,7 @@ class AuthRepository(
             ?: throw IllegalStateException("Refresh token is missing")
 
         val response = authApiService.refreshToken(RefreshTokenRequest(refreshToken))
-        loginMongoDB.saveLoginToken(response.token) // Update stored token
+        loginMongoDB.saveLoginToken(response.accessToken) // Update stored token
         return response
     }
 

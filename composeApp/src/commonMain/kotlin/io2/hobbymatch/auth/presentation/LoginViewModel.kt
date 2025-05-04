@@ -56,7 +56,7 @@ class LoginViewModel(private val authRepository: AuthRepository) : ScreenModel {
                 val response = authRepository.validateToken(token) // Call repository function
                 _state.update {
                     it.copy(
-                        savedToken = response.token,
+                        savedToken = response.accessToken,
                         isLoggedIn = true,
                         isLoading = false,
                         isError = false,
@@ -103,7 +103,7 @@ class LoginViewModel(private val authRepository: AuthRepository) : ScreenModel {
         val refreshedToken = authRepository.refreshToken()
         _state.update {
             it.copy(
-                savedToken = refreshedToken.token,
+                savedToken = refreshedToken.accessToken,
                 isLoggedIn = true,
                 isLoading = false,
                 isError = false,

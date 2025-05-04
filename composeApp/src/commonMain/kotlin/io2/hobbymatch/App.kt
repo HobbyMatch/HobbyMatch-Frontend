@@ -88,7 +88,7 @@ val appModule = module {
     single { AuthRepository(get<AuthApiService>(), get<LoginMongoDB>()) }
 
     // Register ViewModels
-    factory { UserViewModel(get<UserRepository>()) } // ViewModel for the user screen
+    factory { UserViewModel(get<UserRepository>(), get<AuthRepository>()) } // ViewModel for the user screen
     factory { LoginViewModel(get<AuthRepository>()) } // ViewModel for login
     factory { ActivityViewModel(get<LoginMongoDB>()) } // ViewModel for activity
 }
