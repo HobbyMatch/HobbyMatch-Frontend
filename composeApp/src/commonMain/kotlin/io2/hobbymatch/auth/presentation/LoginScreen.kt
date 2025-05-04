@@ -212,6 +212,7 @@ import com.mmk.kmpauth.google.GoogleAuthCredentials
 import com.mmk.kmpauth.google.GoogleAuthProvider
 import com.mmk.kmpauth.google.GoogleButtonUiContainer
 import com.mmk.kmpauth.uihelper.google.GoogleSignInButton
+import io2.hobbymatch.business.presentation.BusinessClientScreen
 import io2.hobbymatch.utils.navigation.ScaffoldingScreen
 
 class LoginScreen : Screen {
@@ -238,6 +239,12 @@ class LoginScreen : Screen {
         LaunchedEffect(state.isLoggedIn, state.isLoading) {
             if (state.isLoggedIn && !state.isLoading) {
                 navigator.push(ScaffoldingScreen())
+            }
+        }
+
+        LaunchedEffect(state.isBusinessClientLoggedIn, state.isLoading) {
+            if (state.isBusinessClientLoggedIn && !state.isLoading) {
+                navigator.push(BusinessClientScreen())
             }
         }
 
@@ -309,7 +316,7 @@ class LoginScreen : Screen {
                             val token = if (isMockMode) "mock_token" else googleUser?.idToken
                             if (token != null) {
                                 viewModel.onEvent(LoginUiEvent.SaveToken(token))
-                                viewModel.onEvent(LoginUiEvent.ValidateToken(token))
+                                viewModel.onEvent(LoginUiEvent.ValidateBusinessClientToken(token))
                             } else {
                                 uiErrorMessage = "Google Sign-In failed: Token is null."
                             }

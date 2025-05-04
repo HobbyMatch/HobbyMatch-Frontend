@@ -7,7 +7,7 @@ import androidx.compose.runtime.getValue
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 
-class BusinessScreen : Screen {
+class BusinessClientScreen : Screen {
     @Composable
     override fun Content() {
         val viewModel = koinScreenModel<BusinessClientViewModel>()

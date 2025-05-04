@@ -15,12 +15,14 @@ data class LoginScreenState(
     val isLoading: Boolean = false,
     val isError: Boolean = false,
     val errorMessage: String? = null,
-    val isLoggedIn: Boolean = false
+    val isLoggedIn: Boolean = false,
+    val isBusinessClientLoggedIn: Boolean = false // Flag to check if the user is a business client
 )
 
 sealed class LoginUiEvent {
     data class SaveToken(val token: String) : LoginUiEvent()
     data class ValidateToken(val token: String) : LoginUiEvent()
+    data class ValidateBusinessClientToken(val token: String) : LoginUiEvent()
     data object HideError : LoginUiEvent()
 }
 
@@ -45,6 +47,38 @@ class LoginViewModel(private val authRepository: AuthRepository) : ScreenModel {
             is LoginUiEvent.ValidateToken -> validateToken(event.token)
             is LoginUiEvent.SaveToken -> saveToken(event.token)
             is LoginUiEvent.HideError -> hideError()
+            is LoginUiEvent.ValidateBusinessClientToken -> validateBusinessClientToken(event.token)
+        }
+    }
+
+    // Function to validate the token
+    private fun validateBusinessClientToken(token: String) {
+        screenModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            try {
+                val response = authRepository.validateToken(token, "BUSINESS") // Call repository function
+                _state.update {
+                    it.copy(
+                        savedToken = response.accessToken,
+                        isBusinessClientLoggedIn = true,
+                        isLoading = false,
+                        isError = false,
+                        errorMessage = null
+                    )
+                }
+            } catch (e: Exception) {
+                try {
+                    refreshToken() // If token validation fails, attempt refreshing
+                } catch (refreshError: Exception) {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            isError = true,
+                            errorMessage = "Token validation failed: ${e.message}"
+                        )
+                    }
+                }
+            }
         }
     }
 

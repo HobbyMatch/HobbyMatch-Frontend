@@ -10,7 +10,7 @@ class AuthRepository(
     private val authApiService: AuthApiService,
     private val loginMongoDB: LoginMongoDB
 ) {
-    suspend fun validateToken(token: String, role: String = "user"): AuthResponse {
+    suspend fun validateToken(token: String, role: String = "USER"): AuthResponse {
         return authApiService.validateGoogleIdToken(token)
     }
 
