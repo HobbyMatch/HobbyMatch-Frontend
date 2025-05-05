@@ -10,6 +10,7 @@ import io.ktor.client.request.url
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io2.hobbymatch.business.domain.BusinessClient
+import io2.hobbymatch.business.domain.CreateVenueDTO
 import io2.hobbymatch.business.domain.Venue
 import io2.hobbymatch.network.ApiConfig
 
@@ -18,7 +19,7 @@ class BusinessClientApiServiceImpl(
     private val apiConfig: ApiConfig
 ) : BusinessClientApiService {
 
-    override suspend fun addVenue(clientId: String, venue: Venue): Venue {
+    override suspend fun addVenue(clientId: String, venue: CreateVenueDTO): Venue {
         return httpClient.post {
             url(apiConfig.getEndpoint(BusinessClientApiEndpoints.ADD_VENUE))
             contentType(ContentType.Application.Json)

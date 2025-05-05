@@ -2,9 +2,12 @@ package io2.hobbymatch.business.presentation
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import io2.hobbymatch.activity.domain.Activity
+import io2.hobbymatch.activity.domain.Location
 import io2.hobbymatch.auth.data.AuthRepository
 import io2.hobbymatch.business.data.BusinessClientRepository
 import io2.hobbymatch.business.domain.BusinessClient
+import io2.hobbymatch.business.domain.CreateVenueDTO
 import io2.hobbymatch.business.domain.Venue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,6 +19,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class BusinessClientScreenState(
+    val id: String = "",
     val email: String = "",
     val name: String = "",
     val venues: List<Venue> = emptyList(),
@@ -35,7 +39,7 @@ sealed class BusinessClientUiEvent {
 }
 
 class BusinessClientViewModel(
-    private val repository: BusinessClientRepository,
+    private val businessClientRepository: BusinessClientRepository,
     private val authRepository: AuthRepository
 ) : ScreenModel {
 
@@ -63,7 +67,48 @@ class BusinessClientViewModel(
                     _state.update { it.copy(isLoggedIn = false) }
                 }
             }
+            is BusinessClientUiEvent.AddVenue -> {
+
+            }
             else -> Unit
+        }
+    }
+
+    fun addVenue(location: Location, hostedActivities: List<Activity>) {
+        screenModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            try {
+                // Pobierz ID zalogowanego użytkownika
+                val ownerId = authRepository.loadAuthResponse()?.loginInfo?.id
+                    ?: throw IllegalStateException("Nie znaleziono ID użytkownika biznesowego")
+
+                // Stwórz obiekt CreateVenueDTO
+                val createVenueDTO = CreateVenueDTO(
+                    location = location,
+                    hostedActivities = hostedActivities,
+                    owner = ownerId
+                )
+
+                // Wyślij żądanie dodania Venue
+                val newVenue = businessClientRepository.addVenue(ownerId.toString(), createVenueDTO)
+
+                // Zaktualizuj stan ekranu
+                _state.update {
+                    it.copy(
+                        venues = it.venues + newVenue,
+                        isLoading = false,
+                        isError = false
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isError = true,
+                        errorMessage = e.message,
+                        isLoading = false
+                    )
+                }
+            }
         }
     }
 
@@ -76,7 +121,7 @@ class BusinessClientViewModel(
                     ?: throw IllegalStateException("Nie znaleziono ID użytkownika biznesowego")
 
                 // Pobierz dane użytkownika biznesowego z BusinessClientRepository
-                val client = repository.getBusinessClient(clientId)
+                val client = businessClientRepository.getBusinessClient(clientId)
 
                 // Zaktualizuj stan UI
                 _state.update {
@@ -109,7 +154,7 @@ class BusinessClientViewModel(
                     name = _state.value.name,
                     email = _state.value.email
                 )
-                repository.updateBusinessClient("1", updatedClient)
+                businessClientRepository.updateBusinessClient("1", updatedClient)
                 _state.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
                 _state.update {

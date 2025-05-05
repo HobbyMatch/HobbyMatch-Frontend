@@ -98,7 +98,7 @@ val appModule = module {
     factory { UserViewModel(get<UserRepository>(), get<AuthRepository>()) } // ViewModel for the user screen
     factory { AuthViewModel(get<AuthRepository>()) } // ViewModel for login
     factory { ActivityViewModel(get<AuthMongoDB>()) } // ViewModel for activity
-    factory { BusinessClientViewModel(get<BusinessClientRepository>(), get<AuthRepository>()) } // ViewModel for business client}
+    single { BusinessClientViewModel(get<BusinessClientRepository>(), get<AuthRepository>()) } // ViewModel for business client}
 }
 
 fun initializeKoin() {

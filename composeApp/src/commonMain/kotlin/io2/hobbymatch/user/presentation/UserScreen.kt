@@ -38,7 +38,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
-import io2.hobbymatch.auth.presentation.AuthScreen
 
 class UserScreen : Screen, Tab {
 
@@ -184,7 +183,7 @@ class UserScreen : Screen, Tab {
                     Button(
                         onClick = {
                             viewModel.onEvent(UserUiEvent.Logout)
-                            navigator.push(AuthScreen())
+                            // navigator.push(AuthScreen())
                         },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !state.isLoading // Disable button when loading

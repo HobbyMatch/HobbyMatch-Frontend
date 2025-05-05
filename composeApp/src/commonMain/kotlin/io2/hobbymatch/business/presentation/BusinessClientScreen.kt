@@ -35,7 +35,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import io2.hobbymatch.auth.presentation.AuthScreen
 import io2.hobbymatch.business.domain.Venue
 
 class BusinessClientScreen : Screen {
@@ -170,7 +169,7 @@ class BusinessClientScreen : Screen {
                 onClick = {
                     if (navigator.canPop) {
                         onEvent(BusinessClientUiEvent.Logout)
-                        navigator.push(AuthScreen())
+                        // navigator.push(AuthScreen())
                     } else {
                         println("Navigator cannot pop")
                     }

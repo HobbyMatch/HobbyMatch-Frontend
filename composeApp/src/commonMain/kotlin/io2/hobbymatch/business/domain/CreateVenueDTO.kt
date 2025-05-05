@@ -5,9 +5,8 @@ import io2.hobbymatch.activity.domain.Location
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Venue(
-    val id: Long,
+data class CreateVenueDTO(
     val location: Location,
-    val hostedActivities: List<Activity>,
-    val ownerId: BusinessClient
+    val hostedActivities: List<Activity> = emptyList(),
+    val owner: Long
 )
