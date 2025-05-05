@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class LoginScreenState(
+data class AuthScreenState(
     // val email: String = "", // Maybe needed later for display?
     val savedToken: String? = null, // Store the token loaded from DB
     val isLoading: Boolean = false,
@@ -19,35 +19,35 @@ data class LoginScreenState(
     val isBusinessClientLoggedIn: Boolean = false // Flag to check if the user is a business client
 )
 
-sealed class LoginUiEvent {
-    data class SaveToken(val token: String) : LoginUiEvent()
-    data class ValidateToken(val token: String) : LoginUiEvent()
-    data class ValidateBusinessClientToken(val token: String) : LoginUiEvent()
-    data object HideError : LoginUiEvent()
+sealed class AuthUiEvent {
+    data class SaveToken(val token: String) : AuthUiEvent()
+    data class ValidateToken(val token: String) : AuthUiEvent()
+    data class ValidateBusinessClientToken(val token: String) : AuthUiEvent()
+    data object HideError : AuthUiEvent()
 }
 
-class LoginViewModel(private val authRepository: AuthRepository) : ScreenModel {
+class AuthViewModel(private val authRepository: AuthRepository) : ScreenModel {
 
-    private val _state = MutableStateFlow(LoginScreenState())
-    val state: StateFlow<LoginScreenState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(AuthScreenState())
+    val state: StateFlow<AuthScreenState> = _state.asStateFlow()
 
     init {
         // Validate token on initialization
         screenModelScope.launch {
             val token = authRepository.loadToken()
             if (!token.isNullOrEmpty()) {
-                onEvent(LoginUiEvent.ValidateToken(token))
+                onEvent(AuthUiEvent.ValidateToken(token))
             }
         }
     }
 
     // Handles UI events sent from LoginScreen
-    fun onEvent(event: LoginUiEvent) {
+    fun onEvent(event: AuthUiEvent) {
         when (event) {
-            is LoginUiEvent.ValidateToken -> validateToken(event.token)
-            is LoginUiEvent.SaveToken -> saveToken(event.token)
-            is LoginUiEvent.HideError -> hideError()
-            is LoginUiEvent.ValidateBusinessClientToken -> validateBusinessClientToken(event.token)
+            is AuthUiEvent.ValidateToken -> validateToken(event.token)
+            is AuthUiEvent.SaveToken -> saveToken(event.token)
+            is AuthUiEvent.HideError -> hideError()
+            is AuthUiEvent.ValidateBusinessClientToken -> validateBusinessClientToken(event.token)
         }
     }
 

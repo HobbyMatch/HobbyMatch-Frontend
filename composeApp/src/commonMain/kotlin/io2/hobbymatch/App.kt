@@ -16,8 +16,8 @@ import io2.hobbymatch.auth.data.AuthRepository
 import io2.hobbymatch.auth.data.local.realm.LoginMongoDB
 import io2.hobbymatch.auth.data.remote.AuthApiService
 import io2.hobbymatch.auth.data.remote.MockAuthApiService
-import io2.hobbymatch.auth.presentation.LoginScreen
-import io2.hobbymatch.auth.presentation.LoginViewModel
+import io2.hobbymatch.auth.presentation.AuthScreen
+import io2.hobbymatch.auth.presentation.AuthViewModel
 import io2.hobbymatch.business.data.BusinessClientRepository
 import io2.hobbymatch.business.data.remote.MockBusinessClientApiService
 import io2.hobbymatch.business.presentation.BusinessClientViewModel
@@ -49,7 +49,7 @@ fun App() {
     )
 
     MaterialTheme(colorScheme = colors) {
-        Navigator(LoginScreen()) {
+        Navigator(AuthScreen()) {
             SlideTransition(it)
         }
     }
@@ -94,7 +94,7 @@ val appModule = module {
 
     // Register ViewModels
     factory { UserViewModel(get<UserRepository>(), get<AuthRepository>()) } // ViewModel for the user screen
-    factory { LoginViewModel(get<AuthRepository>()) } // ViewModel for login
+    factory { AuthViewModel(get<AuthRepository>()) } // ViewModel for login
     factory { ActivityViewModel(get<LoginMongoDB>()) } // ViewModel for activity
     factory { BusinessClientViewModel(/*get<BusinessClientRepository>()*/) } // ViewModel for business client}
 }

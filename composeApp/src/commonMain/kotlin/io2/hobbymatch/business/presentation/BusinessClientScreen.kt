@@ -137,7 +137,7 @@ class BusinessClientScreen : Screen {
                         items(state.venues) { venue ->
                             VenueItem(
                                 venue = venue,
-                                onRemove = { onEvent(BusinessClientUiEvent.RemoveVenue(venue.id)) }
+                                onRemove = { onEvent(BusinessClientUiEvent.RemoveVenue(venue.id.toString())) }
                             )
                         }
                     }
@@ -178,11 +178,11 @@ class BusinessClientScreen : Screen {
             ) {
                 Column {
                     Text(
-                        text = venue.name,
+                        text = venue.id.toString(),
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = venue.address,
+                        text = venue.location.toString(),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }

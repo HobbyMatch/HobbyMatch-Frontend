@@ -215,13 +215,13 @@ import com.mmk.kmpauth.uihelper.google.GoogleSignInButton
 import io2.hobbymatch.business.presentation.BusinessClientScreen
 import io2.hobbymatch.utils.navigation.ScaffoldingScreen
 
-class LoginScreen : Screen {
+class AuthScreen : Screen {
     @Composable
     override fun Content() {
         val isMockMode = true // DEBUG PURPOSES ONLY
 
         val navigator = LocalNavigator.currentOrThrow
-        val viewModel = koinScreenModel<LoginViewModel>()
+        val viewModel = koinScreenModel<AuthViewModel>()
         val state by viewModel.state.collectAsState()
 
         var authReady by remember { mutableStateOf(false) }
@@ -288,8 +288,8 @@ class LoginScreen : Screen {
                         onGoogleSignInResult = { googleUser ->
                             val token = if (isMockMode) "mock_access_token" else googleUser?.idToken
                             if (token != null) {
-                                viewModel.onEvent(LoginUiEvent.SaveToken(token))
-                                viewModel.onEvent(LoginUiEvent.ValidateToken(token))
+                                viewModel.onEvent(AuthUiEvent.SaveToken(token))
+                                viewModel.onEvent(AuthUiEvent.ValidateToken(token))
                             } else {
                                 uiErrorMessage = "Google Sign-In failed: Token is null."
                             }
@@ -315,8 +315,8 @@ class LoginScreen : Screen {
                         onGoogleSignInResult = { googleUser ->
                             val token = if (isMockMode) "mock_access_token" else googleUser?.idToken
                             if (token != null) {
-                                viewModel.onEvent(LoginUiEvent.SaveToken(token))
-                                viewModel.onEvent(LoginUiEvent.ValidateBusinessClientToken(token))
+                                viewModel.onEvent(AuthUiEvent.SaveToken(token))
+                                viewModel.onEvent(AuthUiEvent.ValidateBusinessClientToken(token))
                             } else {
                                 uiErrorMessage = "Google Sign-In failed: Token is null."
                             }
@@ -372,7 +372,7 @@ class LoginScreen : Screen {
                         title = { Text("Error") },
                         text = { Text(it) },
                         confirmButton = {
-                            Button(onClick = { viewModel.onEvent(LoginUiEvent.HideError) }) {
+                            Button(onClick = { viewModel.onEvent(AuthUiEvent.HideError) }) {
                                 Text("OK")
                             }
                         }

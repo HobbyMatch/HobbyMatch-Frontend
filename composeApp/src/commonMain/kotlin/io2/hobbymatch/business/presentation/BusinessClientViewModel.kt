@@ -1,11 +1,17 @@
 package io2.hobbymatch.business.presentation
 
 import cafe.adriel.voyager.core.model.ScreenModel
+import io2.hobbymatch.business.data.BusinessClientRepository
+import io2.hobbymatch.business.domain.BusinessClient
 import io2.hobbymatch.business.domain.Venue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 data class BusinessClientScreenState(
     val email: String = "",
@@ -26,7 +32,7 @@ sealed class BusinessClientUiEvent {
 }
 
 class BusinessClientViewModel(
-    //private val repository: BusinessClientRepository
+    private val repository: BusinessClientRepository
 ) : ScreenModel {
 
     private val _state = MutableStateFlow(BusinessClientScreenState())
@@ -44,19 +50,57 @@ class BusinessClientViewModel(
             is BusinessClientUiEvent.EnterName -> {
                 _state.update { it.copy(name = event.name) }
             }
-            is BusinessClientUiEvent.AddVenue -> {
-                // Implement adding venue logic
-            }
-            is BusinessClientUiEvent.RemoveVenue -> {
-                // Implement removing venue logic
-            }
             is BusinessClientUiEvent.Save -> {
-                // Implement save logic
+                saveBusinessClientProfile()
             }
+            else -> Unit
         }
     }
 
     private fun loadBusinessClientProfile() {
+        CoroutineScope(Dispatchers.IO).launch {
+            _state.update { it.copy(isLoading = true) }
+            try {
+                val client = repository.getBusinessClient("1") // Przykładowe ID
+                _state.update {
+                    it.copy(
+                        name = client.name,
+                        email = client.email,
+                        isLoading = false
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isError = true,
+                        errorMessage = e.message,
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
 
+    private fun saveBusinessClientProfile() {
+        CoroutineScope(Dispatchers.IO).launch {
+            _state.update { it.copy(isLoading = true) }
+            try {
+                val updatedClient = BusinessClient(
+                    id = 1.toString(), // Przykładowe ID
+                    name = _state.value.name,
+                    email = _state.value.email
+                )
+                repository.updateBusinessClient("1", updatedClient)
+                _state.update { it.copy(isLoading = false) }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isError = true,
+                        errorMessage = e.message,
+                        isLoading = false
+                    )
+                }
+            }
+        }
     }
 }
