@@ -4,4 +4,7 @@ object BusinessClientApiEndpoints {
     const val BASE_PATH = "business"
 
     const val ADD_VENUE = "$BASE_PATH/venue"
+    const val GET_BCLIENT = "$BASE_PATH/{clientId}"
+    const val UPDATE_BCLIENT = "$BASE_PATH/{clientId}"
+    const val GET_VENUE = "$BASE_PATH/venue/{venueId}"
 }
