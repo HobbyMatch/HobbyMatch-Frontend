@@ -6,6 +6,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 class AuthDataRealm : RealmObject {
     @PrimaryKey
     var id: String = "LOGIN_DATA"
+    var role: String = ""
     var idToken: String = ""
     var accessToken: String = ""
     var refreshToken: String = ""

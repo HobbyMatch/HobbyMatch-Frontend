@@ -31,15 +31,19 @@ class AuthViewModel(private val authRepository: AuthRepository) : ScreenModel {
     private val _state = MutableStateFlow(AuthScreenState())
     val state: StateFlow<AuthScreenState> = _state.asStateFlow()
 
-    init {
-        // Validate token on initialization
-        screenModelScope.launch {
-            val token = authRepository.loadToken()
-            if (!token.isNullOrEmpty()) {
-                onEvent(AuthUiEvent.ValidateToken(token))
-            }
-        }
-    }
+   init {
+       screenModelScope.launch {
+           val token = authRepository.loadToken()
+           val role = authRepository.loadRole() // Pobranie roli
+           if (!token.isNullOrEmpty() && !role.isNullOrEmpty()) {
+               if (role == "BUSINESS") {
+                   onEvent(AuthUiEvent.ValidateBusinessClientToken(token))
+               } else {
+                   onEvent(AuthUiEvent.ValidateToken(token))
+               }
+           }
+       }
+   }
 
     // Handles UI events sent from LoginScreen
     fun onEvent(event: AuthUiEvent) {
@@ -57,7 +61,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ScreenModel {
             _state.update { it.copy(isLoading = true) }
             try {
                 val response = authRepository.validateToken(token, "BUSINESS") // Call repository function
-                authRepository.saveAuthResponse(response)
+                authRepository.saveAuthResponse(response, "BUSINESS")
                 _state.update {
                     it.copy(
                         savedToken = response.accessToken,
@@ -89,7 +93,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ScreenModel {
             _state.update { it.copy(isLoading = true) }
             try {
                 val response = authRepository.validateToken(token) // Call repository function
-                authRepository.saveAuthResponse(response)
+                authRepository.saveAuthResponse(response, "USER")
                 _state.update {
                     it.copy(
                         savedToken = response.accessToken,

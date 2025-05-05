@@ -96,7 +96,7 @@ class AuthMongoDB {
         }
     }
 
-    suspend fun saveAuthResponse(authResponse: AuthResponse) {
+    suspend fun saveAuthResponse(authResponse: AuthResponse, role: String) {
         val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
         withContext(Dispatchers.IO) {
             currentRealm.write {
@@ -108,6 +108,7 @@ class AuthMongoDB {
                         userId = authResponse.loginInfo.id
                         email = authResponse.loginInfo.email
                         name = authResponse.loginInfo.name
+                        this.role = role // Zapis roli
                     }
                 } else {
                     this.copyToRealm(AuthDataRealm().apply {
@@ -117,9 +118,18 @@ class AuthMongoDB {
                         userId = authResponse.loginInfo.id
                         email = authResponse.loginInfo.email
                         name = authResponse.loginInfo.name
+                        this.role = role // Zapis roli
                     })
                 }
             }
+        }
+    }
+
+    suspend fun loadRole(): String? {
+        val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
+        return withContext(Dispatchers.IO) {
+            val data = currentRealm.query<AuthDataRealm>("id == $0", LOGIN_DATA_ID).first().find()
+            data?.role // Zwraca zapisaną rolę lub null
         }
     }
 
