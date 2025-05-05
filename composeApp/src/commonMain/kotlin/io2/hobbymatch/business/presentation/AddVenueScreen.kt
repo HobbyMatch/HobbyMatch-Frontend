@@ -4,9 +4,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,6 +38,7 @@ class AddVenueScreen : Screen {
         var venueLocation by remember { mutableStateOf("") }
         var locationError by remember { mutableStateOf(false) }
         var isLoading by remember { mutableStateOf(false) }
+        var hasStartedAdding by remember { mutableStateOf(false) }
 
         val navigator = LocalNavigator.currentOrThrow
         val viewModel = koinScreenModel<BusinessClientViewModel>()
@@ -42,7 +47,15 @@ class AddVenueScreen : Screen {
         Scaffold(
             topBar = {
                 androidx.compose.material3.TopAppBar(
-                    title = { Text("Add Venue") }
+                    title = { Text("Add Venue") },
+                    navigationIcon = {
+                        IconButton(onClick = { navigator.pop() }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Back"
+                            )
+                        }
+                    }
                 )
             }
         ) { paddingValues ->
@@ -87,6 +100,7 @@ class AddVenueScreen : Screen {
 
                                 isLoading = true
                                 locationError = false
+                                hasStartedAdding = true
 
                                 viewModel.addVenue(
                                     location = location,
@@ -102,8 +116,8 @@ class AddVenueScreen : Screen {
                     }
                 }
 
-                LaunchedEffect(state.isLoading) {
-                    if (!state.isLoading) {
+                LaunchedEffect(state.isLoading, hasStartedAdding) {
+                    if (hasStartedAdding && !state.isLoading) {
                         isLoading = false
                         if (!state.isError) {
                             navigator.pop()
