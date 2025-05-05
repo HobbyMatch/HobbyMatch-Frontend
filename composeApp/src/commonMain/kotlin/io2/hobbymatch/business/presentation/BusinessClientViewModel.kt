@@ -1,6 +1,7 @@
 package io2.hobbymatch.business.presentation
 
 import cafe.adriel.voyager.core.model.ScreenModel
+import io2.hobbymatch.auth.data.AuthRepository
 import io2.hobbymatch.business.data.BusinessClientRepository
 import io2.hobbymatch.business.domain.BusinessClient
 import io2.hobbymatch.business.domain.Venue
@@ -32,7 +33,8 @@ sealed class BusinessClientUiEvent {
 }
 
 class BusinessClientViewModel(
-    private val repository: BusinessClientRepository
+    private val repository: BusinessClientRepository,
+    private val authRepository: AuthRepository
 ) : ScreenModel {
 
     private val _state = MutableStateFlow(BusinessClientScreenState())

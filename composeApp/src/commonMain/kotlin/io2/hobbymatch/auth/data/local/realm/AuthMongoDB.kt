@@ -4,6 +4,8 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.notifications.SingleQueryChange
+import io2.hobbymatch.auth.domain.AuthResponse
+import io2.hobbymatch.auth.domain.LoginDTO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -13,7 +15,7 @@ import kotlinx.coroutines.withContext
 // Define a constant for the LoginDataRealm object ID
 private const val LOGIN_DATA_ID = "LOGIN_DATA" // From your LoginDataRealm class
 
-class LoginMongoDB {
+class AuthMongoDB {
     private var realm: Realm? = null
 
     init {
@@ -21,12 +23,11 @@ class LoginMongoDB {
     }
 
     private fun configureTheRealm() {
-        if (realm == null || realm?.isClosed() == false) { // Check if not closed
+        if (realm == null || realm?.isClosed() == false) {
             val config = RealmConfiguration.Builder(
-                // Include LoginDataRealm in the schema
-                schema = setOf(LoginDataRealm::class)
+                schema = setOf(AuthDataRealm::class)
             )
-                .name("login.realm") // Optional: Give it a specific name
+                .name("auth.realm")
                 .compactOnLaunch()
                 .deleteRealmIfMigrationNeeded()
                 .build()
@@ -38,38 +39,17 @@ class LoginMongoDB {
         val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
         withContext(Dispatchers.IO) {
             currentRealm.write {
-                val existingLoginData: LoginDataRealm? =
-                    this.query<LoginDataRealm>("id == $0", LOGIN_DATA_ID).first().find()
+                val existingLoginData: AuthDataRealm? =
+                    this.query<AuthDataRealm>("id == $0", LOGIN_DATA_ID).first().find()
 
                 if (existingLoginData != null) {
                     // Update existing
                     findLatest(existingLoginData)?.idToken = token // Or throw error
                 } else {
                     // Create new
-                    this.copyToRealm(LoginDataRealm().apply {
+                    this.copyToRealm(AuthDataRealm().apply {
                         this.id = LOGIN_DATA_ID
                         this.idToken = token
-                    })
-                }
-            }
-        }
-    }
-
-    suspend fun saveJwtToken(jwtToken: String) {
-        val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
-        withContext(Dispatchers.IO) {
-            currentRealm.write {
-                val existingLoginData: LoginDataRealm? =
-                    this.query<LoginDataRealm>("id == $0", LOGIN_DATA_ID).first().find()
-
-                if (existingLoginData != null) {
-                    // Update existing
-                    findLatest(existingLoginData)?.jwtToken = jwtToken // Or throw error
-                } else {
-                    // Create new
-                    this.copyToRealm(LoginDataRealm().apply {
-                        this.id = LOGIN_DATA_ID
-                        this.jwtToken = jwtToken
                     })
                 }
             }
@@ -79,26 +59,18 @@ class LoginMongoDB {
     suspend fun loadLoginToken(): String? {
         val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
         return withContext(Dispatchers.IO) {
-            val loginData = currentRealm.query<LoginDataRealm>("id == $0", LOGIN_DATA_ID).first().find()
+            val loginData = currentRealm.query<AuthDataRealm>("id == $0", LOGIN_DATA_ID).first().find()
             loginData?.idToken // Return token or null
-        }
-    }
-
-    suspend fun loadJwtToken(): String? {
-        val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
-        return withContext(Dispatchers.IO) {
-            val loginData = currentRealm.query<LoginDataRealm>("id == $0", LOGIN_DATA_ID).first().find()
-            loginData?.jwtToken // Return token or null
         }
     }
 
     // --- Get Login Token Flow (Optional but recommended) ---
     fun getLoginTokenFlow(): Flow<String?> {
         val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
-        return currentRealm.query<LoginDataRealm>("id == $0", LOGIN_DATA_ID)
+        return currentRealm.query<AuthDataRealm>("id == $0", LOGIN_DATA_ID)
             .first()
             .asFlow()
-            .map { change: SingleQueryChange<LoginDataRealm> ->
+            .map { change: SingleQueryChange<AuthDataRealm> ->
                 change.obj?.idToken // Map to the token string or null
             }
     }
@@ -110,8 +82,8 @@ class LoginMongoDB {
         withContext(Dispatchers.IO) {
             currentRealm.write {
                 // Query for the object to delete
-                val loginDataToDelete: LoginDataRealm? =
-                    this.query<LoginDataRealm>("id == $0", LOGIN_DATA_ID).first().find()
+                val loginDataToDelete: AuthDataRealm? =
+                    this.query<AuthDataRealm>("id == $0", LOGIN_DATA_ID).first().find()
 
                 // If found, find the latest version in this transaction and delete it
                 loginDataToDelete?.let { foundObject ->
@@ -120,6 +92,51 @@ class LoginMongoDB {
                         println("Login token reset (LoginDataRealm object deleted).") // Optional log
                     } ?: println("Could not find latest version of LoginDataRealm to delete.")
                 } ?: println("Login token already reset (LoginDataRealm object not found).") // Optional log
+            }
+        }
+    }
+
+    suspend fun saveAuthResponse(authResponse: AuthResponse) {
+        val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
+        withContext(Dispatchers.IO) {
+            currentRealm.write {
+                val existingData = this.query<AuthDataRealm>("id == $0", LOGIN_DATA_ID).first().find()
+                if (existingData != null) {
+                    findLatest(existingData)?.apply {
+                        accessToken = authResponse.accessToken
+                        refreshToken = authResponse.refreshToken
+                        userId = authResponse.loginInfo.id
+                        email = authResponse.loginInfo.email
+                        name = authResponse.loginInfo.name
+                    }
+                } else {
+                    this.copyToRealm(AuthDataRealm().apply {
+                        id = LOGIN_DATA_ID
+                        accessToken = authResponse.accessToken
+                        refreshToken = authResponse.refreshToken
+                        userId = authResponse.loginInfo.id
+                        email = authResponse.loginInfo.email
+                        name = authResponse.loginInfo.name
+                    })
+                }
+            }
+        }
+    }
+
+    suspend fun loadAuthResponse(): AuthResponse? {
+        val currentRealm = realm ?: throw IllegalStateException("Realm is not initialized.")
+        return withContext(Dispatchers.IO) {
+            val data = currentRealm.query<AuthDataRealm>("id == $0", LOGIN_DATA_ID).first().find()
+            data?.let {
+                AuthResponse(
+                    accessToken = it.accessToken,
+                    refreshToken = it.refreshToken,
+                    loginInfo = LoginDTO(
+                        id = it.userId,
+                        email = it.email,
+                        name = it.name
+                    )
+                )
             }
         }
     }

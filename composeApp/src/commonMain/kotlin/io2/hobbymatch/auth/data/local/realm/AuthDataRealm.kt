@@ -3,9 +3,13 @@ package io2.hobbymatch.auth.data.local.realm
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
-class LoginDataRealm : RealmObject {
+class AuthDataRealm : RealmObject {
     @PrimaryKey
     var id: String = "LOGIN_DATA"
     var idToken: String = ""
-    var jwtToken: String = ""
+    var accessToken: String = ""
+    var refreshToken: String = ""
+    var userId: Long = 0
+    var email: String = ""
+    var name: String = ""
 }

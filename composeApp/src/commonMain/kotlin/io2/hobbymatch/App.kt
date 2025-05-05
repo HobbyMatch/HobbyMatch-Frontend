@@ -13,7 +13,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import io2.hobbymatch.activity.presentation.ActivityViewModel
 import io2.hobbymatch.auth.data.AuthRepository
-import io2.hobbymatch.auth.data.local.realm.LoginMongoDB
+import io2.hobbymatch.auth.data.local.realm.AuthMongoDB
 import io2.hobbymatch.auth.data.remote.AuthApiService
 import io2.hobbymatch.auth.data.remote.MockAuthApiService
 import io2.hobbymatch.auth.presentation.AuthScreen
@@ -58,7 +58,7 @@ fun App() {
 val appModule = module {
     // Provide Realm Database instances as singletons
     single { UserMongoDB() } // For user-related local data
-    single { LoginMongoDB() } // For authentication-related local data
+    single { AuthMongoDB() } // For authentication-related local data
 
     // Provide API configuration
     single { ApiConfig.DEVELOPMENT }
@@ -90,13 +90,13 @@ val appModule = module {
 
     // Provide Auth-related dependencies
     single<AuthApiService> { MockAuthApiService() }
-    single { AuthRepository(get<AuthApiService>(), get<LoginMongoDB>()) }
+    single { AuthRepository(get<AuthApiService>(), get<AuthMongoDB>()) }
 
     // Register ViewModels
     factory { UserViewModel(get<UserRepository>(), get<AuthRepository>()) } // ViewModel for the user screen
     factory { AuthViewModel(get<AuthRepository>()) } // ViewModel for login
-    factory { ActivityViewModel(get<LoginMongoDB>()) } // ViewModel for activity
-    factory { BusinessClientViewModel(/*get<BusinessClientRepository>()*/) } // ViewModel for business client}
+    factory { ActivityViewModel(get<AuthMongoDB>()) } // ViewModel for activity
+    factory { BusinessClientViewModel(get<BusinessClientRepository>(), get<AuthRepository>()) } // ViewModel for business client}
 }
 
 fun initializeKoin() {
