@@ -19,6 +19,7 @@ import io2.hobbymatch.auth.data.remote.MockAuthApiService
 import io2.hobbymatch.auth.presentation.AuthScreen
 import io2.hobbymatch.auth.presentation.AuthViewModel
 import io2.hobbymatch.business.data.BusinessClientRepository
+import io2.hobbymatch.business.data.remote.BusinessClientApiService
 import io2.hobbymatch.business.data.remote.MockBusinessClientApiService
 import io2.hobbymatch.business.presentation.BusinessClientViewModel
 import io2.hobbymatch.network.ApiConfig
@@ -82,11 +83,12 @@ val appModule = module {
 
     // Bind User API Service (use MockUserApiService for now)
     single<UserApiService> { MockUserApiService() }
+    single<BusinessClientApiService> { MockBusinessClientApiService() }
 
     // Provide UserRepository (used by UserViewModel)
     single { UserRepository(get<UserApiService>(), get<UserMongoDB>()) }
 
-    single{ BusinessClientRepository(get<MockBusinessClientApiService>()) }
+    single{ BusinessClientRepository(get<BusinessClientApiService>()) }
 
     // Provide Auth-related dependencies
     single<AuthApiService> { MockAuthApiService() }

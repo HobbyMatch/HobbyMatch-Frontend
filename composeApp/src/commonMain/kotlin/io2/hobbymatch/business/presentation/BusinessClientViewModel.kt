@@ -1,6 +1,7 @@
 package io2.hobbymatch.business.presentation
 
 import cafe.adriel.voyager.core.model.ScreenModel
+import cafe.adriel.voyager.core.model.screenModelScope
 import io2.hobbymatch.auth.data.AuthRepository
 import io2.hobbymatch.business.data.BusinessClientRepository
 import io2.hobbymatch.business.domain.BusinessClient
@@ -29,6 +30,7 @@ sealed class BusinessClientUiEvent {
     data class EnterName(val name: String) : BusinessClientUiEvent()
     data class AddVenue(val hobby: String) : BusinessClientUiEvent()
     data class RemoveVenue(val hobby: String) : BusinessClientUiEvent()
+    data object Logout : BusinessClientUiEvent()
     data object Save : BusinessClientUiEvent()
 }
 
@@ -55,20 +57,35 @@ class BusinessClientViewModel(
             is BusinessClientUiEvent.Save -> {
                 saveBusinessClientProfile()
             }
+            is BusinessClientUiEvent.Logout -> {
+                screenModelScope.launch {
+                    authRepository.logout()
+                    _state.update { it.copy(isLoggedIn = false) }
+                }
+            }
             else -> Unit
         }
     }
 
     private fun loadBusinessClientProfile() {
-        CoroutineScope(Dispatchers.IO).launch {
+        screenModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             try {
-                val client = repository.getBusinessClient("1") // Przykładowe ID
+                // Pobierz ID użytkownika z AuthRepository
+                val clientId = authRepository.loadAuthResponse()?.loginInfo?.id?.toString()
+                    ?: throw IllegalStateException("Nie znaleziono ID użytkownika biznesowego")
+
+                // Pobierz dane użytkownika biznesowego z BusinessClientRepository
+                val client = repository.getBusinessClient(clientId)
+
+                // Zaktualizuj stan UI
                 _state.update {
                     it.copy(
                         name = client.name,
                         email = client.email,
-                        isLoading = false
+                        venues = client.venues,
+                        isLoading = false,
+                        isError = false
                     )
                 }
             } catch (e: Exception) {

@@ -23,7 +23,7 @@ class UserApiServiceImpl(
         }.body()
     }
 
-    override suspend fun getUser(userId: String): User {
+    override suspend fun getUserById(userId: String): User {
         return httpClient.get {
             url(apiConfig.getEndpoint(UserApiEndpoints.GET_USER.replace("{userId}", userId)))
         }.body()
@@ -37,7 +37,7 @@ class UserApiServiceImpl(
         }.body()
     }
 
-    override suspend fun updateUser(userId: String, requestBody: UpdateUserRequest): User {
+    override suspend fun updateUserById(userId: String, requestBody: UpdateUserRequest): User {
         return httpClient.put {
             url(apiConfig.getEndpoint(UserApiEndpoints.UPDATE_USER.replace("{userId}", userId)))
             contentType(ContentType.Application.Json)

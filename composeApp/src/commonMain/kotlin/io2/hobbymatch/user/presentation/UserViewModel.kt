@@ -8,13 +8,11 @@ import io2.hobbymatch.user.domain.Hobby
 import io2.hobbymatch.user.domain.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class UserScreenState(
+    val id: String = "",
     val email: String = "",
     val name: String = "",
     val hobbies: List<Hobby> = emptyList(),
@@ -45,30 +43,64 @@ class UserViewModel(
         loadUserProfile()
     }
 
+    private fun loadUserProfile() {
+        screenModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            try {
+                // Pobierz ID użytkownika z AuthRepository
+                val userId = authRepository.loadAuthResponse()?.loginInfo?.id?.toString()
+                    ?: throw IllegalStateException("Nie znaleziono ID użytkownika")
+
+                // Pobierz dane użytkownika z UserRepository
+                val user = userRepository.getUserById(userId)
+
+                // Zaktualizuj stan UI
+                _state.update {
+                    it.copy(
+                        id = user.id,
+                        email = user.email,
+                        name = user.name,
+                        hobbies = user.hobbies,
+                        isLoading = false,
+                        isError = false
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        isError = true,
+                        errorMessage = e.message
+                    )
+                }
+            }
+        }
+    }
+
     /**
      * Observes user profile from local storage and updates the state.
      */
-    private fun loadUserProfile() {
-        screenModelScope.launch {
-            userRepository.observeAuthenticatedUser()
-                .catch { handleError(it) } // Handle any errors while observing the flow
-                .onEach { user ->
-                    if (user != null) {
-                        _state.update { currentState ->
-                            currentState.copy(
-                                email = user.email,
-                                name = user.name,
-                                hobbies = user.hobbies,
-                                isLoading = false,
-                                isError = false,
-                                errorMessage = null
-                            )
-                        }
-                    }
-                }
-                .launchIn(screenModelScope)
-        }
-    }
+//    private fun loadUserProfile() {
+//        screenModelScope.launch {
+//            userRepository.observeAuthenticatedUser()
+//                .catch { handleError(it) } // Handle any errors while observing the flow
+//                .onEach { user ->
+//                    if (user != null) {
+//                        _state.update { currentState ->
+//                            currentState.copy(
+//                                email = user.email,
+//                                name = user.name,
+//                                hobbies = user.hobbies,
+//                                isLoading = false,
+//                                isError = false,
+//                                errorMessage = null
+//                            )
+//                        }
+//                    }
+//                }
+//                .launchIn(screenModelScope)
+//        }
+//    }
 
     /**
      * Handles user events and updates accordingly.
@@ -117,12 +149,13 @@ class UserViewModel(
             val currentState = _state.value
             try {
                 val user = User(
-                    id = "", // Assuming ID is managed internally in the repository
+                    id = currentState.id, // Pobranie ID użytkownika z aktualnego stanu
                     name = currentState.name,
                     email = currentState.email,
                     hobbies = currentState.hobbies
                 )
-                userRepository.updateAuthenticatedUser(user)
+                // Wywołanie updateUserById z UserRepository
+                userRepository.updateUserById(currentState.id, user)
                 _state.update { it.copy(isLoading = false, isError = false) }
             } catch (e: Exception) {
                 handleError(e)

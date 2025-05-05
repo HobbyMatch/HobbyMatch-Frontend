@@ -184,7 +184,7 @@ class UserScreen : Screen, Tab {
                     Button(
                         onClick = {
                             viewModel.onEvent(UserUiEvent.Logout)
-                            navigator.popUntil { it is AuthScreen }
+                            navigator.push(AuthScreen())
                         },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !state.isLoading // Disable button when loading

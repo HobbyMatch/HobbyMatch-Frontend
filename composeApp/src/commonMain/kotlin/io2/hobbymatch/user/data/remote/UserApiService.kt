@@ -5,7 +5,7 @@ import io2.hobbymatch.user.domain.User
 
 interface UserApiService {
     suspend fun getAuthenticatedUser(): User
-    suspend fun getUser(userId: String): User
+    suspend fun getUserById(userId: String): User
     suspend fun updateAuthenticatedUser(requestBody: UpdateUserRequest): User
-    suspend fun updateUser(userId: String, requestBody: UpdateUserRequest): User
+    suspend fun updateUserById(userId: String, requestBody: UpdateUserRequest): User
 }

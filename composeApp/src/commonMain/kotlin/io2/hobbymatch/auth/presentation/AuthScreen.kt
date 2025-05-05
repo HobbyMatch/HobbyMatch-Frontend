@@ -260,7 +260,7 @@ class AuthScreen : Screen {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Welcome to HobbyMatch",
+                    text = "Welcome to HobbyMatch!",
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 24.sp

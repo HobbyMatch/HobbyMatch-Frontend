@@ -15,13 +15,19 @@ class MockUserApiService : UserApiService {
     )
 
     private val mockUsers = mutableMapOf(
-        "user123" to User(
+        "1" to User(
+            id = "1",
+            name = "John Doe",
+            email = "john.doe@example.com",
+            hobbies = listOf(Hobby("Reading"), Hobby("Cycling"))
+        ),
+        "2" to User(
             id = "2",
             name = "Jane Smith",
             email = "jane.smith@example.com",
             hobbies = listOf(Hobby("Painting"), Hobby("Music"))
         ),
-        "user456" to User(
+        "3" to User(
             id = "3",
             name = "Mike Brown",
             email = "mike.brown@example.com",
@@ -34,7 +40,7 @@ class MockUserApiService : UserApiService {
         return mockAuthenticatedUser
     }
 
-    override suspend fun getUser(userId: String): User {
+    override suspend fun getUserById(userId: String): User {
         delay(500) // Simulate network delay
         return mockUsers[userId] ?: throw IllegalArgumentException("User with ID $userId not found.")
     }
@@ -49,7 +55,7 @@ class MockUserApiService : UserApiService {
         return mockAuthenticatedUser
     }
 
-    override suspend fun updateUser(userId: String, requestBody: UpdateUserRequest): User {
+    override suspend fun updateUserById(userId: String, requestBody: UpdateUserRequest): User {
         delay(500) // Simulate network delay
         val updatedUser = mockUsers[userId]?.copy(
             name = requestBody.name,

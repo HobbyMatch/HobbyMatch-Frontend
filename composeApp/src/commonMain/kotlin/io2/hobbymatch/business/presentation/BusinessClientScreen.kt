@@ -33,6 +33,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import io2.hobbymatch.auth.presentation.AuthScreen
 import io2.hobbymatch.business.domain.Venue
 
 class BusinessClientScreen : Screen {
@@ -63,6 +66,8 @@ class BusinessClientScreen : Screen {
         onEvent: (BusinessClientUiEvent) -> Unit,
         modifier: Modifier = Modifier
     ) {
+        val navigator = LocalNavigator.currentOrThrow
+
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -121,7 +126,10 @@ class BusinessClientScreen : Screen {
                             style = MaterialTheme.typography.titleLarge
                         )
                         Button(
-                            onClick = { onEvent(BusinessClientUiEvent.AddVenue("")) }
+                            onClick = {
+                                onEvent(BusinessClientUiEvent.AddVenue(""))
+                                navigator.push(AddVenueScreen())
+                            }
                         ) {
                             Icon(Icons.Default.Add, contentDescription = "Add venue")
                             Spacer(Modifier.width(4.dp))
@@ -157,6 +165,21 @@ class BusinessClientScreen : Screen {
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             }
+
+            Button(
+                onClick = {
+                    if (navigator.canPop) {
+                        onEvent(BusinessClientUiEvent.Logout)
+                        navigator.push(AuthScreen())
+                    } else {
+                        println("Navigator cannot pop")
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Logout")
+            }
+
         }
     }
 

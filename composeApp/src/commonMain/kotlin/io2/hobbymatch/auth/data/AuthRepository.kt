@@ -46,4 +46,12 @@ class AuthRepository(
     suspend fun logout() {
         authMongoDB.resetLoginToken()
     }
+
+    suspend fun saveAuthResponse(authResponse: AuthResponse) {
+        authMongoDB.saveAuthResponse(authResponse)
+    }
+
+    suspend fun loadAuthResponse(): AuthResponse? {
+        return authMongoDB.loadAuthResponse()
+    }
 }
