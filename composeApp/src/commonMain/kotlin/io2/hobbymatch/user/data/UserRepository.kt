@@ -60,19 +60,19 @@ class UserRepository(
      * Fetch a specific user by ID from the API.
      */
     suspend fun getUserById(userId: String): User {
-        return apiService.getUser(userId)
+        return apiService.getUserById(userId)
     }
 
     /**
      * Update a specific user by ID via the API.
      * Doesn't save anything in the local database for other users.
      */
-    suspend fun updateUser(userId: String, user: User): User {
+    suspend fun updateUserById(userId: String, user: User): User {
         val updateRequest = UpdateUserRequest(
             name = user.name,
             email = user.email,
             hobbies = user.hobbies
         )
-        return apiService.updateUser(userId, updateRequest)
+        return apiService.updateUserById(userId, updateRequest)
     }
 }

@@ -18,8 +18,8 @@ class AuthApiServiceImpl(
     private val httpClient: HttpClient,
     private val apiConfig: ApiConfig
 ) : AuthApiService {
-    override suspend fun validateIdToken(token: String): AuthResponse {
-        val body = mapOf("idToken" to token)
+    override suspend fun validateGoogleIdToken(token: String, role: String): AuthResponse {
+        val body = mapOf("idToken" to token, "role" to role)
 
         return httpClient.post {
             url(apiConfig.getEndpoint(AuthApiEndpoints.GOOGLE_LOGIN)) // Example: Add the validation endpoint

@@ -34,6 +34,8 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 
@@ -62,6 +64,8 @@ class UserScreen : Screen, Tab {
 
         val scrollState = rememberScrollState()
         var newHobby by remember { mutableStateOf("") }
+
+        val navigator = LocalNavigator.currentOrThrow
 
         Scaffold(
             topBar = {
@@ -172,6 +176,22 @@ class UserScreen : Screen, Tab {
                             Text("Saving...")
                         } else {
                             Text("Save Changes")
+                        }
+                    }
+
+                    // Save Changes Button
+                    Button(
+                        onClick = {
+                            viewModel.onEvent(UserUiEvent.Logout)
+                            // navigator.push(AuthScreen())
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !state.isLoading // Disable button when loading
+                    ) {
+                        if (state.isLoggedIn) {
+                            Text("Logout")
+                        } else {
+                            Text("Logged out")
                         }
                     }
                 }
