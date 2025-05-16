@@ -3,14 +3,11 @@ package io2.hobbymatch.activity.presentation
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.get
-import io.ktor.client.request.headers
 import io.ktor.serialization.kotlinx.json.json
 import io2.hobbymatch.activity.domain.Activity
 import io2.hobbymatch.activity.domain.Hobby
-import io2.hobbymatch.auth.data.local.realm.LoginMongoDB
+import io2.hobbymatch.auth.data.local.realm.AuthMongoDB
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -22,7 +19,7 @@ data class HobbyDto(
     val name: String
 )
 
-class ActivityViewModel(private val loginMongoDB: LoginMongoDB) : ScreenModel {
+class ActivityViewModel(private val authMongoDB: AuthMongoDB) : ScreenModel {
 
     private val baseUrl = "http://172.20.10.3:8080"
     private val httpClient = HttpClient {
@@ -49,20 +46,20 @@ class ActivityViewModel(private val loginMongoDB: LoginMongoDB) : ScreenModel {
     init {
         screenModelScope.launch {
             try {
-                jwtToken = loginMongoDB.loadJwtToken()
-                println("✅ Loaded JWT Token: $jwtToken")
+//                jwtToken = authMongoDB.loadJwtToken()
+//                println("✅ Loaded JWT Token: $jwtToken")
+//
+//                println("Fetching hobbies...")
+//                val response = httpClient.get("$baseUrl/api/hobbies") {
+//                    headers {
+//                        append("Authorization", "Bearer $jwtToken")
+//                    }
+//                }
+//
+//                //val responseBody = response.body<List<Hobby>>() // Replace with your DTO
+//                val responseBody = response.body<List<HobbyDto>>()
 
-                println("Fetching hobbies...")
-                val response = httpClient.get("$baseUrl/api/hobbies") {
-                    headers {
-                        append("Authorization", "Bearer $jwtToken")
-                    }
-                }
-
-                //val responseBody = response.body<List<Hobby>>() // Replace with your DTO
-                val responseBody = response.body<List<HobbyDto>>()
-
-                println("✅ Response: $responseBody")
+                // println("✅ Response: $responseBody")
             } catch (e: Exception) {
                 println("❌ Failed to load JWT Token: ${e.message}")
             }
@@ -79,18 +76,18 @@ class ActivityViewModel(private val loginMongoDB: LoginMongoDB) : ScreenModel {
         screenModelScope.launch {
             _isLoading.value = true
             try {
-                jwtToken = loginMongoDB.loadJwtToken()
-                println("✅ Loaded JWT Token: $jwtToken")
-
-                val response = httpClient.get("$baseUrl/api/activities") {
-                    headers {
-                        append("Authorization", "Bearer $jwtToken")
-                    }
-                }
-
-                val activityList = response.body<List<Activity>>() // lub ActivityDto jeśli masz konwersję
-                _activities.value = activityList
-                println("✅ Loaded ${activityList.size} activities")
+//                jwtToken = authMongoDB.loadJwtToken()
+//                println("✅ Loaded JWT Token: $jwtToken")
+//
+//                val response = httpClient.get("$baseUrl/api/activities") {
+//                    headers {
+//                        append("Authorization", "Bearer $jwtToken")
+//                    }
+//                }
+//
+//                val activityList = response.body<List<Activity>>() // lub ActivityDto jeśli masz konwersję
+//                _activities.value = activityList
+//                println("✅ Loaded ${activityList.size} activities")
             } catch (e: Exception) {
                 println("❌ Error fetching activities: ${e.message}")
                 _error.value = e.message
