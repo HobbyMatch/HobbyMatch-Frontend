@@ -6,3 +6,4 @@ import kotlinx.serialization.Serializable
 data class Hobby(
     val name: String
 )
+
