@@ -7,9 +7,14 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.realm.plugin)
+    alias(libs.plugins.kotlinCocoapods)
 }
 
 kotlin {
+    cocoapods {
+        pod("MapLibre", "6.9.0")
+    }
+
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
@@ -77,6 +82,9 @@ kotlin {
             //Google Auth
             implementation("io.github.mirzemehdi:kmpauth-google:2.0.0")
             implementation("io.github.mirzemehdi:kmpauth-uihelper:2.0.0")
+
+            // Maps - Libre Map Compose
+            implementation(libs.maplibre.compose)
         }
         iosMain.dependencies {
             // ktor - Network connectivity - iOS
