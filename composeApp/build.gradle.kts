@@ -12,7 +12,11 @@ plugins {
 
 kotlin {
     cocoapods {
+        version = "1.0.0"
         pod("MapLibre", "6.9.0")
+        framework {
+            baseName = "ComposeApp"
+        }
     }
 
     androidTarget {
@@ -26,10 +30,10 @@ kotlin {
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "ComposeApp"
-            isStatic = true
-        }
+//        iosTarget.binaries.framework {
+//            baseName = "ComposeApp"
+//            isStatic = true
+//        }
     }
     
     sourceSets {
