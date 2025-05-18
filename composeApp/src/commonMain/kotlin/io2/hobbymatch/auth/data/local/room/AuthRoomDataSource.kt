@@ -4,7 +4,7 @@ import io2.hobbymatch.auth.domain.AuthResponse
 import io2.hobbymatch.auth.domain.LoginDTO
 import kotlinx.coroutines.flow.Flow
 
-class RoomAuthDataSource(private val authDao: AuthDao) {
+class AuthRoomDataSource(private val authDao: AuthDao) {
 
     suspend fun saveLoginToken(token: String) {
         val existingData = authDao.getAuthData()

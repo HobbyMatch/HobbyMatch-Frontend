@@ -7,7 +7,7 @@ import io.ktor.serialization.kotlinx.json.json
 import io2.hobbymatch.activity.presentation.ActivityViewModel
 import io2.hobbymatch.auth.data.AuthRepository
 import io2.hobbymatch.auth.data.local.room.AuthDatabase
-import io2.hobbymatch.auth.data.local.room.RoomAuthDataSource
+import io2.hobbymatch.auth.data.local.room.AuthRoomDataSource
 import io2.hobbymatch.auth.data.local.room.getAuthRoomDatabase
 import io2.hobbymatch.auth.data.remote.AuthApiService
 import io2.hobbymatch.auth.data.remote.MockAuthApiService
@@ -49,7 +49,7 @@ val appModule = module {
     single { getUserRoomDatabase(get(named("UserBuilder"))) }
 
     // Provide Room Database instances as singletons
-    single { RoomAuthDataSource(get<AuthDatabase>().authDao()) }
+    single { AuthRoomDataSource(get<AuthDatabase>().authDao()) }
     single { UserRoomDataSource(get<UserDatabase>()) }
 
     // Provide API configuration
@@ -77,13 +77,13 @@ val appModule = module {
     single<BusinessClientApiService> { MockBusinessClientApiService() }
 
     // Provide UserRepository (used by UserViewModel)
-    single { UserRepository(get<UserApiService>()/*, get<UserMongoDB>()*/) }
+    single { UserRepository(get<UserApiService>(), get<UserRoomDataSource>()) }
 
     single { BusinessClientRepository(get<BusinessClientApiService>()) }
 
     // Provide Auth-related dependencies
     single<AuthApiService> { MockAuthApiService() }
-    single { AuthRepository(get<AuthApiService>(), get<RoomAuthDataSource>()) }
+    single { AuthRepository(get<AuthApiService>(), get<AuthRoomDataSource>()) }
 
     // Register ViewModels
     factory {
@@ -99,5 +99,5 @@ val appModule = module {
             get<BusinessClientRepository>(),
             get<AuthRepository>()
         )
-    } // ViewModel for business client}
+    }
 }
