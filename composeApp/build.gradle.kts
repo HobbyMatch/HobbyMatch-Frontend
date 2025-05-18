@@ -8,9 +8,43 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+    alias(libs.plugins.kotlinCocoapods)
 }
 
 kotlin {
+//    cocoapods {
+//        // Required properties
+//        // Specify the required Pod version here
+//        // Otherwise, the Gradle project version is used
+//        version = "1.0"
+//        summary = "Some description for a Kotlin/Native module"
+//        homepage = "Link to a Kotlin/Native module homepage"
+//
+//        // Optional properties
+//        // Configure the Pod name here instead of changing the Gradle project name
+//        name = "MyCocoaPod"
+//
+//        // pod("MapLibre", "6.13.0")
+//
+//        framework {
+//            // Required properties
+//            // Framework name configuration. Use this property instead of deprecated 'frameworkName'
+//            baseName = "ComposeApp"
+//
+//            // Optional properties
+//            // Specify the framework linking type. It's dynamic by default.
+//            isStatic = false
+//            // Dependency export
+//            // Uncomment and specify another project module if you have one:
+//            // export(project(":<your other KMP module>"))
+//            transitiveExport = false // This is default.
+//        }
+//
+////        // Maps custom Xcode configuration to NativeBuildType
+////        xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = NativeBuildType.DEBUG
+////        xcodeConfigurationToNativeBuildType["CUSTOM_RELEASE"] = NativeBuildType.RELEASE
+//    }
+
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
@@ -82,6 +116,9 @@ kotlin {
             // Room - Local SQL Database
             implementation(libs.androidx.room.runtime)
             implementation(libs.sqlite.bundled)
+
+            // MapLibre - Map rendering
+            implementation(libs.maplibre.compose)
         }
         iosMain.dependencies {
             // ktor - Network connectivity - iOS
