@@ -8,25 +8,40 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+    alias(libs.plugins.kotlinCocoapods)
 }
 
 kotlin {
+    cocoapods {
+        version = "1.0.0"
+        pod("MapLibre", "6.13.0")
+        pod("GoogleSignIn", "8.0.0")
+        ios.deploymentTarget = "18.3.2"
+        framework {
+            baseName = "ComposeApp"
+        }
+    }
+
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "ComposeApp"
-            isStatic = true
-        }
-    }
+
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
+//    listOf(
+//        iosX64(),
+//        iosArm64(),
+//        iosSimulatorArm64()
+//    ).forEach { iosTarget ->
+//        iosTarget.binaries.framework {
+//            baseName = "ComposeApp"
+//            isStatic = true
+//        }
+//    }
     
     sourceSets {
         
@@ -82,6 +97,9 @@ kotlin {
             // Room - Local SQL Database
             implementation(libs.androidx.room.runtime)
             implementation(libs.sqlite.bundled)
+
+            // Maps - Libre Map Compose
+            implementation(libs.maplibre.compose)
         }
         iosMain.dependencies {
             // ktor - Network connectivity - iOS
