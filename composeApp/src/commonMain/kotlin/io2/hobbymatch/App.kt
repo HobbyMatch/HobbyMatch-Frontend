@@ -9,7 +9,6 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
 import io2.hobbymatch.auth.presentation.AuthScreen
 import io2.hobbymatch.di.appModule
-import io2.hobbymatch.di.initializeKoin
 import io2.hobbymatch.ui.theme.darkScheme
 import io2.hobbymatch.ui.theme.lightScheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -19,7 +18,7 @@ import org.koin.core.annotation.KoinInternalApi
 @Composable
 @Preview
 fun App() {
-    initializeKoin()
+    // initializeKoin()
     println(appModule.includedModules)
 
     // Set up the theme based on the system settings

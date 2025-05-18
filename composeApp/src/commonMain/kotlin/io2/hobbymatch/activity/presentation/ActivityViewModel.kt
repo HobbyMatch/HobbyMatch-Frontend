@@ -7,7 +7,6 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import io2.hobbymatch.activity.domain.Activity
 import io2.hobbymatch.activity.domain.Hobby
-import io2.hobbymatch.auth.data.local.realm.AuthMongoDB
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -19,7 +18,7 @@ data class HobbyDto(
     val name: String
 )
 
-class ActivityViewModel(private val authMongoDB: AuthMongoDB) : ScreenModel {
+class ActivityViewModel(/*private val authMongoDB: AuthMongoDB*/) : ScreenModel {
 
     private val baseUrl = "http://172.20.10.3:8080"
     private val httpClient = HttpClient {

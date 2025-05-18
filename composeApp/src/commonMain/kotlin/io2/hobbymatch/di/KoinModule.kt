@@ -6,7 +6,6 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import io2.hobbymatch.activity.presentation.ActivityViewModel
 import io2.hobbymatch.auth.data.AuthRepository
-import io2.hobbymatch.auth.data.local.realm.AuthMongoDB
 import io2.hobbymatch.auth.data.local.room.AuthDatabase
 import io2.hobbymatch.auth.data.local.room.RoomAuthDataSource
 import io2.hobbymatch.auth.data.local.room.getRoomDatabase
@@ -19,7 +18,6 @@ import io2.hobbymatch.business.data.remote.MockBusinessClientApiService
 import io2.hobbymatch.business.presentation.BusinessClientViewModel
 import io2.hobbymatch.network.ApiConfig
 import io2.hobbymatch.user.data.UserRepository
-import io2.hobbymatch.user.data.local.realm.UserMongoDB
 import io2.hobbymatch.user.data.remote.MockUserApiService
 import io2.hobbymatch.user.data.remote.UserApiService
 import io2.hobbymatch.user.presentation.UserViewModel
@@ -49,7 +47,7 @@ val appModule = module {
     single { RoomAuthDataSource(get<AuthDatabase>().authDao()) }
 
     // Provide Realm Database instances as singletons
-    single { UserMongoDB() } // For user-related local data
+    // single { UserMongoDB() } // For user-related local data
     // single { AuthMongoDB() } // For authentication-related local data
 
     // Provide API configuration
@@ -77,7 +75,7 @@ val appModule = module {
     single<BusinessClientApiService> { MockBusinessClientApiService() }
 
     // Provide UserRepository (used by UserViewModel)
-    single { UserRepository(get<UserApiService>(), get<UserMongoDB>()) }
+    single { UserRepository(get<UserApiService>()/*, get<UserMongoDB>()*/) }
 
     single { BusinessClientRepository(get<BusinessClientApiService>()) }
 
@@ -93,7 +91,7 @@ val appModule = module {
         )
     } // ViewModel for the user screen
     factory { AuthViewModel(get<AuthRepository>()) } // ViewModel for login
-    factory { ActivityViewModel(get<AuthMongoDB>()) } // ViewModel for activity
+    factory { ActivityViewModel(/*get<AuthMongoDB>()*/) } // ViewModel for activity
     single {
         BusinessClientViewModel(
             get<BusinessClientRepository>(),

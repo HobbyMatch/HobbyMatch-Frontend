@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
-    alias(libs.plugins.realm.plugin)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
 }
@@ -45,6 +44,7 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
+            implementation(compose.materialIconsExtended)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
@@ -72,15 +72,12 @@ kotlin {
             // Stately Common - state management
             implementation(libs.stately.common)
 
-            // Realm - Local NoSQL Database
-            implementation(libs.mongodb.realm)
-
             // Coroutines - kotlinx.coroutines library for non-blocking asynchronous computations
             implementation(libs.kotlin.coroutines)
 
             //Google Auth
-            implementation("io.github.mirzemehdi:kmpauth-google:2.0.0")
-            implementation("io.github.mirzemehdi:kmpauth-uihelper:2.0.0")
+            implementation(libs.kmpauth.google)
+            implementation(libs.kmpauth.uihelper)
 
             // Room - Local SQL Database
             implementation(libs.androidx.room.runtime)
