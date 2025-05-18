@@ -1,9 +1,8 @@
 package io2.hobbymatch.user.data
 
-import io2.hobbymatch.user.data.local.realm.UserMongoDB
-import io2.hobbymatch.user.data.local.realm.toDomainModel
-import io2.hobbymatch.user.data.local.realm.toRealmObject
+import io2.hobbymatch.user.data.local.room.UserRoomDataSource
 import io2.hobbymatch.user.data.remote.UserApiService
+import io2.hobbymatch.user.domain.Hobby
 import io2.hobbymatch.user.domain.UpdateUserRequest
 import io2.hobbymatch.user.domain.User
 import kotlinx.coroutines.flow.Flow
@@ -11,7 +10,7 @@ import kotlinx.coroutines.flow.map
 
 class UserRepository(
     private val apiService: UserApiService,
-    private val localDB: UserMongoDB
+    private val userRoomDataSource: UserRoomDataSource
 ) {
     /**
      * Fetch the authenticated user from API and update the local database.
@@ -19,7 +18,11 @@ class UserRepository(
     suspend fun syncAuthenticatedUser(): User {
         val userFromApi = apiService.getAuthenticatedUser()
         // Save user to local storage
-        localDB.saveUserProfile(userFromApi.toRealmObject())
+        userRoomDataSource.saveUserProfile(
+            name = userFromApi.name,
+            email = userFromApi.email,
+            hobbies = userFromApi.hobbies.map { it.name }
+        )
         return userFromApi
     }
 
@@ -27,15 +30,31 @@ class UserRepository(
      * Load the authenticated user from local database.
      */
     suspend fun loadAuthenticatedUser(): User? {
-        return localDB.loadUserProfile()?.toDomainModel()
+        return userRoomDataSource.loadUserProfile()?.let {
+            User(
+                id = it.userProfile.id,
+                name = it.userProfile.name,
+                email = it.userProfile.email,
+                hobbies = it.hobbies.map { hobby -> Hobby(hobby.name) }
+            )
+        }
     }
 
     /**
      * Observe changes to the user profile in the local database.
      */
     fun observeAuthenticatedUser(): Flow<User?> {
-        return localDB.getUserProfileFlow()
-            .map { it?.toDomainModel() }
+        return userRoomDataSource.getUserProfileFlow().map {
+                userProfileWithHobbies ->
+            userProfileWithHobbies?.let {
+                User(
+                    id = it.userProfile.id,
+                    name = it.userProfile.name,
+                    email = it.userProfile.email,
+                    hobbies = it.hobbies.map { hobby -> Hobby(hobby.name) }
+                )
+            }
+        }
     }
 
     /**
@@ -52,7 +71,11 @@ class UserRepository(
         // Update in API
         val updatedUserFromApi = apiService.updateAuthenticatedUser(updateRequest)
         // Save updates to local storage
-        localDB.saveUserProfile(updatedUserFromApi.toRealmObject())
+        userRoomDataSource.saveUserProfile(
+            name = updatedUserFromApi.name,
+            email = updatedUserFromApi.email,
+            hobbies = updatedUserFromApi.hobbies.map { it.name }
+        )
         return updatedUserFromApi
     }
 
