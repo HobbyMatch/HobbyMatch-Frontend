@@ -1,8 +1,11 @@
 package io2.hobbymatch.di
 
-import io2.hobbymatch.database.getDatabaseBuilder
+import io2.hobbymatch.database.getAuthDatabaseBuilder
+import io2.hobbymatch.database.getUserDatabaseBuilder
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 actual val targetDatabaseModule = module {
-    single { getDatabaseBuilder() }
+    single(named("AuthBuilder")) { getAuthDatabaseBuilder() }
+    single(named("UserBuilder")) { getUserDatabaseBuilder() }
 }

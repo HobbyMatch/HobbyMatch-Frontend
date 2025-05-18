@@ -8,7 +8,7 @@ import io2.hobbymatch.activity.presentation.ActivityViewModel
 import io2.hobbymatch.auth.data.AuthRepository
 import io2.hobbymatch.auth.data.local.room.AuthDatabase
 import io2.hobbymatch.auth.data.local.room.RoomAuthDataSource
-import io2.hobbymatch.auth.data.local.room.getRoomDatabase
+import io2.hobbymatch.auth.data.local.room.getAuthRoomDatabase
 import io2.hobbymatch.auth.data.remote.AuthApiService
 import io2.hobbymatch.auth.data.remote.MockAuthApiService
 import io2.hobbymatch.auth.presentation.AuthViewModel
@@ -18,6 +18,9 @@ import io2.hobbymatch.business.data.remote.MockBusinessClientApiService
 import io2.hobbymatch.business.presentation.BusinessClientViewModel
 import io2.hobbymatch.network.ApiConfig
 import io2.hobbymatch.user.data.UserRepository
+import io2.hobbymatch.user.data.local.room.UserDatabase
+import io2.hobbymatch.user.data.local.room.UserRoomDataSource
+import io2.hobbymatch.user.data.local.room.getUserRoomDatabase
 import io2.hobbymatch.user.data.remote.MockUserApiService
 import io2.hobbymatch.user.data.remote.UserApiService
 import io2.hobbymatch.user.presentation.UserViewModel
@@ -26,6 +29,7 @@ import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 import org.koin.core.module.Module
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 expect val targetDatabaseModule : Module
@@ -41,14 +45,12 @@ fun initializeKoin(
 }
 
 val appModule = module {
-    single { getRoomDatabase(get()) }
+    single { getAuthRoomDatabase(get(named("AuthBuilder"))) }
+    single { getUserRoomDatabase(get(named("UserBuilder"))) }
 
-    // Dodaj RoomAuthDataSource
+    // Provide Room Database instances as singletons
     single { RoomAuthDataSource(get<AuthDatabase>().authDao()) }
-
-    // Provide Realm Database instances as singletons
-    // single { UserMongoDB() } // For user-related local data
-    // single { AuthMongoDB() } // For authentication-related local data
+    single { UserRoomDataSource(get<UserDatabase>()) }
 
     // Provide API configuration
     single { ApiConfig.DEVELOPMENT }
