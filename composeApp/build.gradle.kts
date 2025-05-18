@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.realm.plugin)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
 }
 
 kotlin {
@@ -35,6 +37,8 @@ kotlin {
 
             // ktor - Network connectivity - Android
             implementation(libs.ktor.client.android)
+
+            implementation(libs.koin.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -77,12 +81,20 @@ kotlin {
             //Google Auth
             implementation("io.github.mirzemehdi:kmpauth-google:2.0.0")
             implementation("io.github.mirzemehdi:kmpauth-uihelper:2.0.0")
+
+            // Room - Local SQL Database
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.sqlite.bundled)
         }
         iosMain.dependencies {
             // ktor - Network connectivity - iOS
             implementation(libs.ktor.client.darwin)
         }
     }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 android {
@@ -116,5 +128,6 @@ dependencies {
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.foundation.layout.android)
     debugImplementation(compose.uiTooling)
+    ksp(libs.androidx.room.compiler)
 }
 
