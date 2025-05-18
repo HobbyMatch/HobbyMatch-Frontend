@@ -6,7 +6,8 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
-    alias(libs.plugins.realm.plugin)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
 }
 
 kotlin {
@@ -35,12 +36,15 @@ kotlin {
 
             // ktor - Network connectivity - Android
             implementation(libs.ktor.client.android)
+
+            implementation(libs.koin.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
+            implementation(compose.materialIconsExtended)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
@@ -68,21 +72,26 @@ kotlin {
             // Stately Common - state management
             implementation(libs.stately.common)
 
-            // Realm - Local NoSQL Database
-            implementation(libs.mongodb.realm)
-
             // Coroutines - kotlinx.coroutines library for non-blocking asynchronous computations
             implementation(libs.kotlin.coroutines)
 
             //Google Auth
-            implementation("io.github.mirzemehdi:kmpauth-google:2.0.0")
-            implementation("io.github.mirzemehdi:kmpauth-uihelper:2.0.0")
+            implementation(libs.kmpauth.google)
+            implementation(libs.kmpauth.uihelper)
+
+            // Room - Local SQL Database
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.sqlite.bundled)
         }
         iosMain.dependencies {
             // ktor - Network connectivity - iOS
             implementation(libs.ktor.client.darwin)
         }
     }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 android {
@@ -116,5 +125,6 @@ dependencies {
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.foundation.layout.android)
     debugImplementation(compose.uiTooling)
+    ksp(libs.androidx.room.compiler)
 }
 
