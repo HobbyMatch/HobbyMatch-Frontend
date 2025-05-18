@@ -16,9 +16,11 @@ kotlin {
         version = "1.0.0"
         pod("MapLibre", "6.13.0")
         pod("GoogleSignIn", "8.0.0")
-        ios.deploymentTarget = "18.3.2"
+        ios.deploymentTarget = "14.1"
         framework {
             baseName = "ComposeApp"
+            isStatic = true  // Ważne dla stabilności
+            binaryOption("bundleId", "io2.hobbymatch")  // Użyj tego samego ID co w Android
         }
     }
 
