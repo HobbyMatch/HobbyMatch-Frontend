@@ -19,7 +19,9 @@ data class UserScreenState(
     val isLoading: Boolean = false,
     val isError: Boolean = false,
     val errorMessage: String? = null,
-    val isLoggedIn: Boolean = true // Assuming the user is logged in initially
+    val isLoggedIn: Boolean = true, // Assuming the user is logged in initially
+    val isTokenVisible: Boolean = false,
+    val accessToken: String? = null
 )
 
 sealed class UserUiEvent {
@@ -29,6 +31,7 @@ sealed class UserUiEvent {
     data class RemoveHobby(val hobby: String) : UserUiEvent()
     data object Save : UserUiEvent()
     data object Logout : UserUiEvent()
+    data object ToggleTokenVisibility : UserUiEvent()
 }
 
 class UserViewModel(
@@ -41,6 +44,7 @@ class UserViewModel(
 
     init {
         loadUserProfile()
+        loadAccessToken()
     }
 
     private fun loadUserProfile() {
@@ -73,6 +77,17 @@ class UserViewModel(
                         errorMessage = e.message
                     )
                 }
+            }
+        }
+    }
+
+    private fun loadAccessToken() {
+        screenModelScope.launch {
+            try {
+                val token = authRepository.loadAccessToken()
+                _state.update { it.copy(accessToken = token) }
+            } catch (e: Exception) {
+                handleError(e)
             }
         }
     }
@@ -134,8 +149,12 @@ class UserViewModel(
             UserUiEvent.Logout -> {
                 screenModelScope.launch {
                     authRepository.logout()
-                    _state.update { it.copy(isLoggedIn = false) }
+                    _state.update { it.copy(isLoggedIn = false, isTokenVisible = false) }
                 }
+            }
+            
+            UserUiEvent.ToggleTokenVisibility -> {
+                _state.update { it.copy(isTokenVisible = !it.isTokenVisible) }
             }
         }
     }

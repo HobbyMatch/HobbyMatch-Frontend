@@ -33,7 +33,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ScreenModel {
 
    init {
        screenModelScope.launch {
-           val token = authRepository.loadToken()
+           val token = authRepository.loadAccessToken()
            val role = authRepository.loadRole() // Pobranie roli
            if (!token.isNullOrEmpty() && !role.isNullOrEmpty()) {
                if (role == "BUSINESS") {

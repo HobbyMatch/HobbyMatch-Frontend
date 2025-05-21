@@ -6,27 +6,34 @@ import kotlinx.coroutines.flow.Flow
 
 class AuthRoomDataSource(private val authDao: AuthDao) {
 
-    suspend fun saveLoginToken(token: String) {
+    suspend fun saveGoogleIdToken(googleIdToken: String) {
         val existingData = authDao.getAuthData()
         if (existingData != null) {
-            authDao.insertOrUpdateAuth(existingData.copy(token = token, accessToken = token))
+            authDao.insertOrUpdateAuth(existingData.copy(googleIdToken = googleIdToken))
         } else {
-            authDao.insertOrUpdateAuth(AuthEntity(token = token, accessToken = token))
+            authDao.insertOrUpdateAuth(AuthEntity(googleIdToken = googleIdToken))
         }
     }
 
-    suspend fun loadLoginToken(): String? {
-        return authDao.getAuthData()?.token ?: authDao.getAuthData()?.accessToken
+    suspend fun loadAccessToken(): String? {
+        return authDao.getAuthData()?.googleIdToken ?: authDao.getAuthData()?.accessToken
     }
 
-    suspend fun resetLoginToken() {
+    suspend fun loadRefreshToken(): String? {
+        return authDao.getAuthData()?.googleIdToken ?: authDao.getAuthData()?.refreshToken
+    }
+
+    suspend fun resetAllAuthData() {
         authDao.deleteAuthData()
     }
 
     suspend fun saveAuthResponse(authResponse: AuthResponse, role: String) {
+        val existingData = authDao.getAuthData()
+        val existingGoogleIdToken = existingData?.googleIdToken
+
         val newData = AuthEntity(
             id = "LOGIN_DATA",
-            token = authResponse.accessToken,
+            googleIdToken = existingGoogleIdToken ?: authResponse.accessToken,
             accessToken = authResponse.accessToken,
             refreshToken = authResponse.refreshToken,
             userId = authResponse.loginInfo.id,

@@ -17,33 +17,33 @@ class AuthRepository(
     // Login with Google and store token locally
     suspend fun loginWithGoogle(idToken: String): AuthResponse {
         val response = authApiService.googleLogin(GoogleLoginRequest(idToken))
-        authRoomDataSource.saveLoginToken(response.accessToken)
+        authRoomDataSource.saveGoogleIdToken(response.accessToken)
         return response
     }
 
     // Refresh token
     suspend fun refreshToken(): AuthResponse {
-        val refreshToken = authRoomDataSource.loadLoginToken()
+        val refreshToken = authRoomDataSource.loadRefreshToken()
             ?: throw IllegalStateException("Refresh token is missing")
 
         val response = authApiService.refreshToken(RefreshTokenRequest(refreshToken))
-        authRoomDataSource.saveLoginToken(response.accessToken) // Update stored token
+        authRoomDataSource.saveGoogleIdToken(response.accessToken) // Update stored token
         return response
     }
 
     // Save token to local storage
     suspend fun saveToken(token: String) {
-        authRoomDataSource.saveLoginToken(token)
+        authRoomDataSource.saveGoogleIdToken(token)
     }
 
     // Get the currently stored token
-    suspend fun loadToken(): String? {
-        return authRoomDataSource.loadLoginToken()
+    suspend fun loadAccessToken(): String? {
+        return authRoomDataSource.loadAccessToken()
     }
 
-    // Logout (clears stored token)
+    // Logout (clears all stored auth data)
     suspend fun logout() {
-        authRoomDataSource.resetLoginToken()
+        authRoomDataSource.resetAllAuthData()
     }
 
     suspend fun saveAuthResponse(authResponse: AuthResponse, role: String = "USER") {
