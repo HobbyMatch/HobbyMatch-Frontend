@@ -9,7 +9,7 @@ import io2.hobbymatch.auth.data.local.room.AuthDatabase
 import io2.hobbymatch.auth.data.local.room.AuthRoomDataSource
 import io2.hobbymatch.auth.data.local.room.getAuthRoomDatabase
 import io2.hobbymatch.auth.data.remote.AuthApiService
-import io2.hobbymatch.auth.data.remote.MockAuthApiService
+import io2.hobbymatch.auth.data.remote.AuthApiServiceImpl
 import io2.hobbymatch.auth.presentation.AuthViewModel
 import io2.hobbymatch.business.data.BusinessClientRepository
 import io2.hobbymatch.business.data.remote.BusinessClientApiService
@@ -24,8 +24,8 @@ import io2.hobbymatch.user.data.UserRepository
 import io2.hobbymatch.user.data.local.room.UserDatabase
 import io2.hobbymatch.user.data.local.room.UserRoomDataSource
 import io2.hobbymatch.user.data.local.room.getUserRoomDatabase
-import io2.hobbymatch.user.data.remote.MockUserApiService
 import io2.hobbymatch.user.data.remote.UserApiService
+import io2.hobbymatch.user.data.remote.UserApiServiceImpl
 import io2.hobbymatch.user.presentation.UserViewModel
 import kotlinx.serialization.json.Json
 import org.koin.core.KoinApplication
@@ -76,7 +76,10 @@ val appModule = module {
     }
 
     // Bind User API Service (use MockUserApiService for now)
-    single<UserApiService> { MockUserApiService() }
+    single<UserApiService> { UserApiServiceImpl(
+        httpClient = get<HttpClient>(),
+        apiConfig = get<ApiConfig>()
+    ) }
     single<BusinessClientApiService> { MockBusinessClientApiService() }
     single<HobbyApiService> { HobbyApiServiceImpl(
         httpClient = get<HttpClient>(),
@@ -91,7 +94,10 @@ val appModule = module {
     single { HobbyRepository(get<HobbyApiService>()) }
 
     // Provide Auth-related dependencies
-    single<AuthApiService> { MockAuthApiService() }
+    single<AuthApiService> { AuthApiServiceImpl(
+        httpClient = get<HttpClient>(),
+        apiConfig = get<ApiConfig>()
+    ) }
     single { AuthRepository(get<AuthApiService>(), get<AuthRoomDataSource>()) }
 
     // Register ViewModels

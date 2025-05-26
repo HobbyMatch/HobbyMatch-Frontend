@@ -23,7 +23,7 @@ data class ApiConfig(
         )
 
         val PRODUCTION = ApiConfig(
-            baseUrl = "192.168.0.47:8080",
+            baseUrl = "172.20.10.3:8080",
             apiVersion = "v1",
             useHttps = false
         )

@@ -42,7 +42,7 @@ import io2.hobbymatch.utils.navigation.ScaffoldingScreen
 class AuthScreen : Screen {
     @Composable
     override fun Content() {
-        val isMockMode = true // DEBUG PURPOSES ONLY
+        val isMockMode = false // DEBUG PURPOSES ONLY
 
         val navigator = LocalNavigator.currentOrThrow
         val viewModel = koinScreenModel<AuthViewModel>()
