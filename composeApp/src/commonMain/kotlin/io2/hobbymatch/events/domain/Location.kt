@@ -1,4 +1,4 @@
-package io2.hobbymatch.activity.domain
+package io2.hobbymatch.events.domain
 
 import kotlinx.serialization.Serializable
 

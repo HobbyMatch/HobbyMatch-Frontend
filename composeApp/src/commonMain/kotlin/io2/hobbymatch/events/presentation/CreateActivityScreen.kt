@@ -1,4 +1,4 @@
-package io2.hobbymatch.activity.presentation
+package io2.hobbymatch.events.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

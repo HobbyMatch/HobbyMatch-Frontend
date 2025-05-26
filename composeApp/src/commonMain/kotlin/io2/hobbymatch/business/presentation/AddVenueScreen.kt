@@ -28,7 +28,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import io2.hobbymatch.activity.domain.Location
+import io2.hobbymatch.events.domain.Location
 
 class AddVenueScreen : Screen {
     @OptIn(ExperimentalMaterial3Api::class)

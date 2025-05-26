@@ -1,4 +1,4 @@
-package io2.hobbymatch.user.domain
+package io2.hobbymatch.events.domain
 
 import kotlinx.serialization.Serializable
 
@@ -6,3 +6,4 @@ import kotlinx.serialization.Serializable
 data class Hobby(
     val name: String
 )
+

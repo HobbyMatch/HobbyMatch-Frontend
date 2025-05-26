@@ -1,12 +1,12 @@
-package io2.hobbymatch.activity.presentation
+package io2.hobbymatch.events.presentation
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
-import io2.hobbymatch.activity.domain.Activity
-import io2.hobbymatch.activity.domain.Hobby
+import io2.hobbymatch.events.domain.Activity
+import io2.hobbymatch.events.domain.Hobby
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

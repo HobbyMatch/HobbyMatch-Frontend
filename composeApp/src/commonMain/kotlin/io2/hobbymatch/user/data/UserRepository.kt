@@ -1,8 +1,8 @@
 package io2.hobbymatch.user.data
 
+import io2.hobbymatch.hobby.domain.Hobby
 import io2.hobbymatch.user.data.local.room.UserRoomDataSource
 import io2.hobbymatch.user.data.remote.UserApiService
-import io2.hobbymatch.user.domain.Hobby
 import io2.hobbymatch.user.domain.UpdateUserRequest
 import io2.hobbymatch.user.domain.User
 import kotlinx.coroutines.flow.Flow

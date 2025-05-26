@@ -1,9 +1,9 @@
 package io2.hobbymatch.business.data.remote
 
-import io2.hobbymatch.activity.domain.Location
 import io2.hobbymatch.business.domain.BusinessClient
 import io2.hobbymatch.business.domain.CreateVenueDTO
 import io2.hobbymatch.business.domain.Venue
+import io2.hobbymatch.events.domain.Location
 
 class MockBusinessClientApiService : BusinessClientApiService {
     private val mockVenues = mutableListOf<Venue>()

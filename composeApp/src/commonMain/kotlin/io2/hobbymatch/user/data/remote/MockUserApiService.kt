@@ -1,6 +1,6 @@
 package io2.hobbymatch.user.data.remote
 
-import io2.hobbymatch.user.domain.Hobby
+import io2.hobbymatch.hobby.domain.Hobby
 import io2.hobbymatch.user.domain.UpdateUserRequest
 import io2.hobbymatch.user.domain.User
 import kotlinx.coroutines.delay

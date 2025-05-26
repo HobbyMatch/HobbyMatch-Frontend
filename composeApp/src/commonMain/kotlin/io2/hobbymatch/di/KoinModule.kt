@@ -4,7 +4,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
-import io2.hobbymatch.activity.presentation.ActivityViewModel
 import io2.hobbymatch.auth.data.AuthRepository
 import io2.hobbymatch.auth.data.local.room.AuthDatabase
 import io2.hobbymatch.auth.data.local.room.AuthRoomDataSource
@@ -16,6 +15,10 @@ import io2.hobbymatch.business.data.BusinessClientRepository
 import io2.hobbymatch.business.data.remote.BusinessClientApiService
 import io2.hobbymatch.business.data.remote.MockBusinessClientApiService
 import io2.hobbymatch.business.presentation.BusinessClientViewModel
+import io2.hobbymatch.events.presentation.ActivityViewModel
+import io2.hobbymatch.hobby.data.HobbyRepository
+import io2.hobbymatch.hobby.data.remote.HobbyApiService
+import io2.hobbymatch.hobby.data.remote.MockHobbyApiService
 import io2.hobbymatch.network.ApiConfig
 import io2.hobbymatch.user.data.UserRepository
 import io2.hobbymatch.user.data.local.room.UserDatabase
@@ -75,11 +78,14 @@ val appModule = module {
     // Bind User API Service (use MockUserApiService for now)
     single<UserApiService> { MockUserApiService() }
     single<BusinessClientApiService> { MockBusinessClientApiService() }
+    single<HobbyApiService> { MockHobbyApiService() }
 
     // Provide UserRepository (used by UserViewModel)
     single { UserRepository(get<UserApiService>(), get<UserRoomDataSource>()) }
 
     single { BusinessClientRepository(get<BusinessClientApiService>()) }
+
+    single { HobbyRepository(get<HobbyApiService>()) }
 
     // Provide Auth-related dependencies
     single<AuthApiService> { MockAuthApiService() }
@@ -89,7 +95,8 @@ val appModule = module {
     factory {
         UserViewModel(
             get<UserRepository>(),
-            get<AuthRepository>()
+            get<AuthRepository>(),
+            get<HobbyRepository>()
         )
     } // ViewModel for the user screen
     factory { AuthViewModel(get<AuthRepository>()) } // ViewModel for login

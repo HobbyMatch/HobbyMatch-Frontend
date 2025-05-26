@@ -1,4 +1,4 @@
-package io2.hobbymatch.activity.presentation
+package io2.hobbymatch.events.presentation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,7 +34,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
-import io2.hobbymatch.activity.domain.Activity
+import io2.hobbymatch.events.domain.Activity
 
 class ActivityScreen : Screen, Tab {
     override val options: TabOptions

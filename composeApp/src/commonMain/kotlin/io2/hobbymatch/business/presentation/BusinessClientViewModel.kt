@@ -2,13 +2,13 @@ package io2.hobbymatch.business.presentation
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import io2.hobbymatch.activity.domain.Activity
-import io2.hobbymatch.activity.domain.Location
 import io2.hobbymatch.auth.data.AuthRepository
 import io2.hobbymatch.business.data.BusinessClientRepository
 import io2.hobbymatch.business.domain.BusinessClient
 import io2.hobbymatch.business.domain.CreateVenueDTO
 import io2.hobbymatch.business.domain.Venue
+import io2.hobbymatch.events.domain.Activity
+import io2.hobbymatch.events.domain.Location
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO

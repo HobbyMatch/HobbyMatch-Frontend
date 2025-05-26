@@ -1,7 +1,7 @@
 package io2.hobbymatch.business.domain
 
-import io2.hobbymatch.activity.domain.Activity
-import io2.hobbymatch.activity.domain.Location
+import io2.hobbymatch.events.domain.Activity
+import io2.hobbymatch.events.domain.Location
 import kotlinx.serialization.Serializable
 
 @Serializable

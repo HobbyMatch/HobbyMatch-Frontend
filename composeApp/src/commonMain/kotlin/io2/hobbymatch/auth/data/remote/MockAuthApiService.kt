@@ -1,14 +1,14 @@
 package io2.hobbymatch.auth.data.remote
 
-    import io2.hobbymatch.activity.domain.Hobby
     import io2.hobbymatch.auth.data.remote.models.GoogleLoginRequest
     import io2.hobbymatch.auth.data.remote.models.RefreshTokenRequest
     import io2.hobbymatch.auth.domain.AuthResponse
     import io2.hobbymatch.auth.domain.LoginDTO
     import io2.hobbymatch.auth.domain.UserInfo
+    import io2.hobbymatch.events.domain.Hobby
     import kotlinx.coroutines.delay
 
-    class MockAuthApiService : AuthApiService {
+class MockAuthApiService : AuthApiService {
         private val mockDelay = 500L // Symulacja opóźnienia sieciowego
 
         private val mockLoginInfo = LoginDTO(

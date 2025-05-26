@@ -3,8 +3,9 @@ package io2.hobbymatch.user.presentation
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import io2.hobbymatch.auth.data.AuthRepository
+import io2.hobbymatch.hobby.data.HobbyRepository
+import io2.hobbymatch.hobby.domain.Hobby
 import io2.hobbymatch.user.data.UserRepository
-import io2.hobbymatch.user.domain.Hobby
 import io2.hobbymatch.user.domain.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +22,8 @@ data class UserScreenState(
     val errorMessage: String? = null,
     val isLoggedIn: Boolean = true, // Assuming the user is logged in initially
     val isTokenVisible: Boolean = false,
-    val accessToken: String? = null
+    val accessToken: String? = null,
+    val availableHobbies: List<Hobby> = emptyList()
 )
 
 sealed class UserUiEvent {
@@ -36,7 +38,8 @@ sealed class UserUiEvent {
 
 class UserViewModel(
     private val userRepository: UserRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val hobbyRepository: HobbyRepository
 ) : ScreenModel {
 
     private val _state = MutableStateFlow(UserScreenState())
@@ -45,6 +48,18 @@ class UserViewModel(
     init {
         loadUserProfile()
         loadAccessToken()
+        loadAvailableHobbies()
+    }
+
+    private fun loadAvailableHobbies() {
+        screenModelScope.launch {
+            try {
+                val hobbies = hobbyRepository.getHobbies()
+                _state.update { it.copy(availableHobbies = hobbies) }
+            } catch (e: Exception) {
+                handleError(e)
+            }
+        }
     }
 
     private fun loadUserProfile() {
