@@ -18,7 +18,7 @@ import io2.hobbymatch.business.presentation.BusinessClientViewModel
 import io2.hobbymatch.events.presentation.ActivityViewModel
 import io2.hobbymatch.hobby.data.HobbyRepository
 import io2.hobbymatch.hobby.data.remote.HobbyApiService
-import io2.hobbymatch.hobby.data.remote.MockHobbyApiService
+import io2.hobbymatch.hobby.data.remote.HobbyApiServiceImpl
 import io2.hobbymatch.network.ApiConfig
 import io2.hobbymatch.user.data.UserRepository
 import io2.hobbymatch.user.data.local.room.UserDatabase
@@ -56,7 +56,7 @@ val appModule = module {
     single { UserRoomDataSource(get<UserDatabase>()) }
 
     // Provide API configuration
-    single { ApiConfig.DEVELOPMENT }
+    single { ApiConfig.PRODUCTION }
 
     // Provide HttpClient for network operations
     single {
@@ -78,7 +78,10 @@ val appModule = module {
     // Bind User API Service (use MockUserApiService for now)
     single<UserApiService> { MockUserApiService() }
     single<BusinessClientApiService> { MockBusinessClientApiService() }
-    single<HobbyApiService> { MockHobbyApiService() }
+    single<HobbyApiService> { HobbyApiServiceImpl(
+        httpClient = get<HttpClient>(),
+        apiConfig = get<ApiConfig>(),
+    ) }
 
     // Provide UserRepository (used by UserViewModel)
     single { UserRepository(get<UserApiService>(), get<UserRoomDataSource>()) }

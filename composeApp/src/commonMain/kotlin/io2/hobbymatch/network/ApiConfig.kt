@@ -23,8 +23,9 @@ data class ApiConfig(
         )
 
         val PRODUCTION = ApiConfig(
-            baseUrl = "api.hobbyMatch.com",
-            apiVersion = "v1"
+            baseUrl = "192.168.0.47:8080",
+            apiVersion = "v1",
+            useHttps = false
         )
     }
 }

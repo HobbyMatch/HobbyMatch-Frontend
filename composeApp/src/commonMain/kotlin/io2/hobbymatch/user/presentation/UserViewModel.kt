@@ -54,9 +54,13 @@ class UserViewModel(
     private fun loadAvailableHobbies() {
         screenModelScope.launch {
             try {
+                _state.update { it.copy(isLoading = true) }
+                println("ViewModel: Rozpoczęto ładowanie dostępnych hobby")
                 val hobbies = hobbyRepository.getHobbies()
-                _state.update { it.copy(availableHobbies = hobbies) }
+                println("ViewModel: Załadowano ${hobbies.size} hobby: ${hobbies.joinToString { it.name }}")
+                _state.update { it.copy(availableHobbies = hobbies, isLoading = false) }
             } catch (e: Exception) {
+                println("ViewModel: Błąd podczas ładowania hobby: ${e.message}")
                 handleError(e)
             }
         }
@@ -144,10 +148,19 @@ class UserViewModel(
                 _state.update { it.copy(name = event.name) }
             }
             is UserUiEvent.AddHobby -> {
-                _state.update { currentState ->
-                    currentState.copy(
-                        hobbies = currentState.hobbies + Hobby(event.hobby)
-                    )
+                // Sprawdź, czy hobby już istnieje na liście użytkownika
+                if (_state.value.hobbies.none { it.name == event.hobby }) {
+                    // Znajdź hobby z dostępnej listy
+                    val selectedHobby = _state.value.availableHobbies.find { it.name == event.hobby }
+                    
+                    // Dodaj hobby jeśli znaleziono w dostępnych hobby
+                    selectedHobby?.let {
+                        _state.update { currentState ->
+                            currentState.copy(
+                                hobbies = currentState.hobbies + it
+                            )
+                        }
+                    }
                 }
             }
             is UserUiEvent.RemoveHobby -> {

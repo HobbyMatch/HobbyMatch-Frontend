@@ -1,6 +1,8 @@
 package io2.hobbymatch.user.presentation
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -10,12 +12,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -32,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -62,8 +71,14 @@ class UserScreen : Screen, Tab {
         val viewModel = koinScreenModel<UserViewModel>()
         val state = viewModel.state.collectAsState().value
 
+        // Debugging - sprawdzenie dostępnych hobby
+        val availableHobbiesCount = state.availableHobbies.size
+        println("UserScreen: dostępne hobby (${availableHobbiesCount}): ${state.availableHobbies.map { it.name }}")
+
         val scrollState = rememberScrollState()
         var newHobby by remember { mutableStateOf("") }
+        var expanded by remember { mutableStateOf(false) }
+        var selectedHobby by remember { mutableStateOf("") }
 
         val navigator = LocalNavigator.currentOrThrow
 
@@ -137,28 +152,90 @@ class UserScreen : Screen, Tab {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Add New Hobby Section
+                    // Add New Hobby Section - zmodyfikowana wersja z podziałem na dwa elementy
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        OutlinedTextField(
-                            value = newHobby,
-                            onValueChange = { newHobby = it },
-                            label = { Text("Add Hobby") },
-                            modifier = Modifier.weight(1f)
-                        )
+                        Box(modifier = Modifier.weight(1f)) {
+                            // Użycie zwykłego Box z clickable zamiast OutlinedTextField z clickable
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { 
+                                        expanded = !expanded 
+                                        println("Przełączenie dropdown menu: $expanded")
+                                    }
+                            ) {
+                                OutlinedTextField(
+                                    value = selectedHobby,
+                                    onValueChange = { },
+                                    label = { Text("Wybierz hobby") },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    readOnly = true,
+                                    trailingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowDropDown,
+                                            contentDescription = "Wybierz hobby"
+                                        )
+                                    },
+                                    enabled = false  // Wyłączamy interakcję z polem tekstowym
+                                )
+                            }
+                            
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
+                                modifier = Modifier.width(280.dp)
+                            ) {
+                                if (state.availableHobbies.isEmpty()) {
+                                    DropdownMenuItem(
+                                        text = { Text("Brak dostępnych hobby") },
+                                        onClick = { }
+                                    )
+                                } else {
+                                    state.availableHobbies.forEach { hobby ->
+                                        val isSelected = state.hobbies.any { it.name == hobby.name }
+                                        DropdownMenuItem(
+                                            text = { 
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier.fillMaxWidth()
+                                                ) {
+                                                    Text(
+                                                        text = hobby.name, 
+                                                        fontSize = 16.sp
+                                                    )
+                                                    if (isSelected) {
+                                                        Spacer(modifier = Modifier.weight(1f))
+                                                        Icon(
+                                                            imageVector = Icons.Default.Check,
+                                                            contentDescription = "Wybrano"
+                                                        )
+                                                    }
+                                                }
+                                            },
+                                            onClick = {
+                                                println("Wybrano hobby: ${hobby.name}")
+                                                selectedHobby = hobby.name
+                                                expanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
 
                         Button(
                             onClick = {
-                                if (newHobby.isNotBlank()) {
-                                    viewModel.onEvent(UserUiEvent.AddHobby(newHobby))
-                                    newHobby = ""
+                                if (selectedHobby.isNotBlank()) {
+                                    viewModel.onEvent(UserUiEvent.AddHobby(selectedHobby))
+                                    selectedHobby = ""
                                 }
                             }
                         ) {
-                            Text("Add")
+                            Text("Dodaj")
                         }
                     }
 
