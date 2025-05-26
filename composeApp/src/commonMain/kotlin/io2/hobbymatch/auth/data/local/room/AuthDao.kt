@@ -23,13 +23,13 @@ interface AuthDao {
     // New methods to match AuthMongoDB functionality
 
     // For token operations
-    @Query("UPDATE auth_data SET token = :token WHERE id = 'LOGIN_DATA'")
-    suspend fun saveLoginToken(token: String)
+    @Query("UPDATE auth_data SET accessToken = :accessToken WHERE id = 'LOGIN_DATA'")
+    suspend fun saveLoginToken(accessToken: String)
 
-    @Query("SELECT token FROM auth_data WHERE id = 'LOGIN_DATA' LIMIT 1")
+    @Query("SELECT accessToken FROM auth_data WHERE id = 'LOGIN_DATA' LIMIT 1")
     suspend fun loadLoginToken(): String?
 
-    @Query("SELECT token FROM auth_data WHERE id = 'LOGIN_DATA' LIMIT 1")
+    @Query("SELECT accessToken FROM auth_data WHERE id = 'LOGIN_DATA' LIMIT 1")
     fun getLoginTokenFlow(): Flow<String?>
 
     // For role operations

@@ -7,7 +7,7 @@ import androidx.room.RoomDatabaseConstructor
 
 @Database(
     entities = [AuthEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = true)
 @ConstructedBy(AuthDatabaseConstructor::class)
 abstract class AuthDatabase : RoomDatabase() {

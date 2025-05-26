@@ -194,6 +194,39 @@ class UserScreen : Screen, Tab {
                             Text("Logged out")
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Token Button and Display
+                    Button(
+                        onClick = {
+                            viewModel.onEvent(UserUiEvent.ToggleTokenVisibility)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = state.isLoggedIn && !state.isLoading
+                    ) {
+                        Text(
+                            if (state.isTokenVisible) "Ukryj token" else "Pokaż token"
+                        )
+                    }
+
+                    if (state.isTokenVisible && state.accessToken != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Access Token:",
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Text(
+                            text = state.accessToken,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                        )
+                    }
                 }
             }
         )

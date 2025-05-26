@@ -8,7 +8,7 @@ data class AuthEntity(
     @PrimaryKey
     val id: String = "LOGIN_DATA",
     val role: String = "",
-    val token: String = "", // Dodane pole dla kompatybilności z poprzednimi metodami
+    val googleIdToken: String = "",
     val accessToken: String = "",
     val refreshToken: String = "",
     val userId: Long = 0,
