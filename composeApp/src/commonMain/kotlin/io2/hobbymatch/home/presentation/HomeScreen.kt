@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
-import dev.sargunv.maplibrecompose.compose.MaplibreMap
 
 class HomeScreen : Screen, Tab {
     override val options: TabOptions
@@ -52,7 +51,7 @@ class HomeScreen : Screen, Tab {
                     .padding(horizontal = 16.dp), // Add horizontal padding
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                MaplibreMap()
+                // MaplibreMap()
             }
         }
     }
