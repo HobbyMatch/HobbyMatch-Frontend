@@ -62,6 +62,8 @@ class AuthViewModel(private val authRepository: AuthRepository) : ScreenModel {
             try {
                 val response = authRepository.validateToken(token, "BUSINESS") // Call repository function
                 authRepository.saveAuthResponse(response, "BUSINESS")
+                // print response
+                println(response)
                 _state.update {
                     it.copy(
                         savedToken = response.accessToken,
@@ -94,6 +96,9 @@ class AuthViewModel(private val authRepository: AuthRepository) : ScreenModel {
             try {
                 val response = authRepository.validateToken(token) // Call repository function
                 authRepository.saveAuthResponse(response, "USER")
+                // print response
+                println(response)
+
                 _state.update {
                     it.copy(
                         savedToken = response.accessToken,

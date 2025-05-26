@@ -40,7 +40,7 @@ class MockUserApiService : UserApiService {
         return mockAuthenticatedUser
     }
 
-    override suspend fun getUserById(userId: String): User {
+    override suspend fun getUserById(userId: String, token: String?): User {
         delay(500) // Simulate network delay
         return mockUsers[userId] ?: throw IllegalArgumentException("User with ID $userId not found.")
     }
@@ -55,7 +55,7 @@ class MockUserApiService : UserApiService {
         return mockAuthenticatedUser
     }
 
-    override suspend fun updateUserById(userId: String, requestBody: UpdateUserRequest): User {
+    override suspend fun updateUserById(userId: String, requestBody: UpdateUserRequest, token: String?): User {
         delay(500) // Simulate network delay
         val updatedUser = mockUsers[userId]?.copy(
             name = requestBody.name,

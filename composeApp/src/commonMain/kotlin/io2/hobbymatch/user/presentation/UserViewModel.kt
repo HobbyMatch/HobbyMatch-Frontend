@@ -74,8 +74,9 @@ class UserViewModel(
                 val userId = authRepository.loadAuthResponse()?.loginInfo?.id?.toString()
                     ?: throw IllegalStateException("Nie znaleziono ID użytkownika")
 
+                val token = authRepository.loadAccessToken()
                 // Pobierz dane użytkownika z UserRepository
-                val user = userRepository.getUserById(userId)
+                val user = userRepository.getUserById(userId, token)
 
                 // Zaktualizuj stan UI
                 _state.update {
@@ -183,6 +184,7 @@ class UserViewModel(
 
             UserUiEvent.ToggleTokenVisibility -> {
                 _state.update { it.copy(isTokenVisible = !it.isTokenVisible) }
+                println(state.value.accessToken)
             }
         }
     }
@@ -194,6 +196,7 @@ class UserViewModel(
         screenModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             val currentState = _state.value
+            val token = currentState.accessToken
             try {
                 val user = User(
                     id = currentState.id, // Pobranie ID użytkownika z aktualnego stanu
@@ -202,7 +205,7 @@ class UserViewModel(
                     hobbies = currentState.hobbies
                 )
                 // Wywołanie updateUserById z UserRepository
-                userRepository.updateUserById(currentState.id, user)
+                userRepository.updateUserById(currentState.id, user, token)
                 _state.update { it.copy(isLoading = false, isError = false) }
             } catch (e: Exception) {
                 handleError(e)

@@ -23,10 +23,17 @@ class UserApiServiceImpl(
         }.body()
     }
 
-    override suspend fun getUserById(userId: String): User {
-        return httpClient.get {
+    override suspend fun getUserById(userId: String, token: String?): User {
+        val response = httpClient.get {
             url(apiConfig.getEndpoint(UserApiEndpoints.GET_USER.replace("{userId}", userId)))
-        }.body()
+            token?.let {
+                headers.append("Authorization", "Bearer $it")
+            }
+        }.body<User>()
+
+        println(response)
+
+        return response
     }
 
     override suspend fun updateAuthenticatedUser(requestBody: UpdateUserRequest): User {
@@ -37,11 +44,18 @@ class UserApiServiceImpl(
         }.body()
     }
 
-    override suspend fun updateUserById(userId: String, requestBody: UpdateUserRequest): User {
+    override suspend fun updateUserById(
+        userId: String,
+        requestBody: UpdateUserRequest,
+        token: String?
+    ): User {
         return httpClient.put {
             url(apiConfig.getEndpoint(UserApiEndpoints.UPDATE_USER.replace("{userId}", userId)))
             contentType(ContentType.Application.Json)
             setBody(requestBody)
+            token?.let {
+                headers.append("Authorization", "Bearer $it")
+            }
         }.body()
     }
 }
