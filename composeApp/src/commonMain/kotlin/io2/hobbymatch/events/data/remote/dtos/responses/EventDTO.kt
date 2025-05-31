@@ -3,7 +3,9 @@ package io2.hobbymatch.events.data.remote.dtos.responses
 import io2.hobbymatch.events.domain.Location
 import io2.hobbymatch.hobby.domain.Hobby
 import io2.hobbymatch.user.domain.UserInEventDTO
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class EventDTO(
     val id: Long,
     val title: String,

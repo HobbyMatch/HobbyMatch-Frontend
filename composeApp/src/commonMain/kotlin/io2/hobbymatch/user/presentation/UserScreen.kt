@@ -81,7 +81,6 @@ class UserScreen : Screen, Tab {
         var selectedHobby by remember { mutableStateOf("") }
 
         val navigator = LocalNavigator.currentOrThrow
-
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -99,6 +98,7 @@ class UserScreen : Screen, Tab {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(modifier = Modifier.height(16.dp))
+
 
                     // Show error message if any
                     if (state.isError) {

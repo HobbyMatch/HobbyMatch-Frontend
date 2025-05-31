@@ -1,41 +1,68 @@
 package io2.hobbymatch.events.data.remote
 
 import io.ktor.client.HttpClient
-import io2.hobbymatch.auth.data.AuthRepository
+import io.ktor.client.call.body
+import io.ktor.client.request.delete
+import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.put
+import io.ktor.client.request.setBody
+import io.ktor.client.request.url
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io2.hobbymatch.events.data.remote.dtos.requests.CreateOrUpdateEventDTO
 import io2.hobbymatch.events.data.remote.dtos.responses.EventDTO
 import io2.hobbymatch.network.ApiConfig
 
 class EventsApiServiceImpl(
     private val httpClient: HttpClient,
-    private val apiConfig: ApiConfig,
-    private val authRepository: AuthRepository
+    private val apiConfig: ApiConfig
 ) : EventsApiService {
     override suspend fun createEvent(event: CreateOrUpdateEventDTO): EventDTO {
-        TODO("Not yet implemented")
+        return httpClient.post {
+            url(apiConfig.getEndpoint(EventsApiEndpoints.CREATE_EVENT))
+            contentType(ContentType.Application.Json)
+            setBody(event)
+        }.body()
     }
 
     override suspend fun updateEvent(eventId: Long, event: CreateOrUpdateEventDTO): EventDTO {
-        TODO("Not yet implemented")
+        return httpClient.put {
+            url(apiConfig.getEndpoint(EventsApiEndpoints.UPDATE_EVENT.replace("{eventId}", eventId.toString())))
+            contentType(ContentType.Application.Json)
+            setBody(event)
+        }.body()
     }
 
     override suspend fun getEvent(eventId: Long): EventDTO {
-        TODO("Not yet implemented")
+        return httpClient.get {
+            url(apiConfig.getEndpoint(EventsApiEndpoints.GET_EVENT.replace("{eventId}", eventId.toString())))
+        }.body()
     }
 
     override suspend fun getAllEvents(): List<EventDTO> {
-        TODO("Not yet implemented")
+        return httpClient.get {
+            url(apiConfig.getEndpoint(EventsApiEndpoints.GET_ALL_EVENTS))
+        }.body()
     }
 
     override suspend fun deleteEvent(eventId: Long) {
-        TODO("Not yet implemented")
+        httpClient.delete {
+            url(apiConfig.getEndpoint(EventsApiEndpoints.DELETE_EVENT.replace("{eventId}", eventId.toString())))
+        }
     }
 
     override suspend fun joinEvent(eventId: Long): EventDTO {
-        TODO("Not yet implemented")
+        return httpClient.post {
+            url(apiConfig.getEndpoint(EventsApiEndpoints.JOIN_EVENT.replace("{eventId}", eventId.toString())))
+            contentType(ContentType.Application.Json)
+        }.body()
     }
 
     override suspend fun leaveEvent(eventId: Long): EventDTO {
-        TODO("Not yet implemented")
+        return httpClient.post {
+            url(apiConfig.getEndpoint(EventsApiEndpoints.LEAVE_EVENT.replace("{eventId}", eventId.toString())))
+            contentType(ContentType.Application.Json)
+        }.body()
     }
 }

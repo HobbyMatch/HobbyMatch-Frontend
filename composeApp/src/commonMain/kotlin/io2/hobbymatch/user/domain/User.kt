@@ -11,6 +11,7 @@ data class User(
     var name: String
 )
 
+@Serializable
 data class UserInEventDTO(
     val id: Long,
     val name: String,

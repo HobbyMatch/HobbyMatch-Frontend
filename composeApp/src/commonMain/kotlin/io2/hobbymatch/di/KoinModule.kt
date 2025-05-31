@@ -18,6 +18,10 @@ import io2.hobbymatch.business.data.BusinessClientRepository
 import io2.hobbymatch.business.data.remote.BusinessClientApiService
 import io2.hobbymatch.business.data.remote.MockBusinessClientApiService
 import io2.hobbymatch.business.presentation.BusinessClientViewModel
+import io2.hobbymatch.events.data.EventsRepository
+import io2.hobbymatch.events.data.remote.EventsApiService
+import io2.hobbymatch.events.data.remote.EventsApiServiceImpl
+import io2.hobbymatch.events.presentation.EventsViewModel
 import io2.hobbymatch.hobby.data.HobbyRepository
 import io2.hobbymatch.hobby.data.remote.HobbyApiService
 import io2.hobbymatch.hobby.data.remote.HobbyApiServiceImpl
@@ -43,13 +47,16 @@ fun initializeKoin(
     config: (KoinApplication.() -> Unit)? = null
 ) {
     startKoin {
-        printLogger(level = Level.DEBUG)
+        printLogger(level = Level.INFO)
         config?.invoke(this)
         modules(targetDatabaseModule, appModule)
     }
 }
 
 val appModule = module {
+
+    /** ========= DATABASES ========= **/
+
     single { getAuthRoomDatabase(get(named("AuthBuilder"))) }
     single { getUserRoomDatabase(get(named("UserBuilder"))) }
 
@@ -57,10 +64,12 @@ val appModule = module {
     single { AuthRoomDataSource(get<AuthDatabase>().authDao()) }
     single { UserRoomDataSource(get<UserDatabase>()) }
 
-    // Provide API configuration
+    /** ========= API CONFIG ========= **/
+
     single { ApiConfig.PRODUCTION }
 
-    // Provide HttpClient for network operations
+    /** ========= HTTP CLIENT ========= **/
+
     single {
         HttpClient {
             install(ContentNegotiation) {
@@ -86,7 +95,8 @@ val appModule = module {
         }
     }
 
-    // Bind User API Service (use MockUserApiService for now)
+    /** ========= API SERVICES ========= **/
+
     single<UserApiService> { UserApiServiceImpl(
         httpClient = get<HttpClient>(),
         apiConfig = get<ApiConfig>()
@@ -96,34 +106,55 @@ val appModule = module {
         httpClient = get<HttpClient>(),
         apiConfig = get<ApiConfig>(),
     ) }
+    single<EventsApiService> { EventsApiServiceImpl(
+        httpClient = get<HttpClient>(),
+        apiConfig = get<ApiConfig>()
+    ) }
 
-    // Provide UserRepository (used by UserViewModel)
+    single<AuthApiService> { AuthApiServiceImpl(
+        httpClient = get<HttpClient>(),
+        apiConfig = get<ApiConfig>()
+    ) }
+
+    /** ========= REPOSITORIES ========= **/
+
+
     single { UserRepository(get<UserApiService>(), get<UserRoomDataSource>()) }
 
     single { BusinessClientRepository(get<BusinessClientApiService>()) }
 
     single { HobbyRepository(get<HobbyApiService>()) }
 
-    // Provide Auth-related dependencies
-    single<AuthApiService> { AuthApiServiceImpl(
-        httpClient = get<HttpClient>(),
-        apiConfig = get<ApiConfig>()
-    ) }
     single { AuthRepository(get<AuthApiService>(), get<AuthRoomDataSource>()) }
 
-    // Register ViewModels
+    single { EventsRepository(get<EventsApiService>()) }
+
+    /** ========= VIEW MODELS ========= **/
+
     factory {
         UserViewModel(
             get<UserRepository>(),
             get<AuthRepository>(),
             get<HobbyRepository>()
         )
-    } // ViewModel for the user screen
-    factory { AuthViewModel(get<AuthRepository>()) } // ViewModel for login
+    }
+
+    factory {
+        AuthViewModel(get<AuthRepository>())
+    }
+
     single {
            BusinessClientViewModel(
             get<BusinessClientRepository>(),
             get<AuthRepository>()
+        )
+    }
+
+    factory {
+        EventsViewModel(
+            get<UserRepository>(),
+            get<HobbyRepository>(),
+            get<EventsRepository>()
         )
     }
 }
