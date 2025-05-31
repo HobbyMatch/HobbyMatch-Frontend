@@ -1,6 +1,6 @@
 package io2.hobbymatch.events.data.remote
 
-object AuthApiEndpoints {
+object EventsApiEndpoints {
     const val BASE_PATH = "events"
 
     const val CREATE_EVENT = "$BASE_PATH"

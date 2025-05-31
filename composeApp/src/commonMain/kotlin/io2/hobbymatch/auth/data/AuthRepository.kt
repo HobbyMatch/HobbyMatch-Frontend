@@ -11,6 +11,7 @@ class AuthRepository(
     private val authRoomDataSource: AuthRoomDataSource
 ) {
     suspend fun validateToken(token: String, role: String = "USER"): AuthResponse {
+        println("Validating token: $token with role: $role ...")
         return authApiService.validateGoogleIdToken(token, role = role)
     }
 
@@ -39,6 +40,10 @@ class AuthRepository(
     // Get the currently stored token
     suspend fun loadAccessToken(): String? {
         return authRoomDataSource.loadAccessToken()
+    }
+
+    suspend fun loadRefreshToken(): String? {
+        return authRoomDataSource.loadRefreshToken()
     }
 
     // Logout (clears all stored auth data)

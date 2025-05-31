@@ -2,6 +2,9 @@ package io2.hobbymatch.di
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerTokens
+import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import io2.hobbymatch.auth.data.AuthRepository
@@ -15,7 +18,6 @@ import io2.hobbymatch.business.data.BusinessClientRepository
 import io2.hobbymatch.business.data.remote.BusinessClientApiService
 import io2.hobbymatch.business.data.remote.MockBusinessClientApiService
 import io2.hobbymatch.business.presentation.BusinessClientViewModel
-import io2.hobbymatch.events.presentation.ActivityViewModel
 import io2.hobbymatch.hobby.data.HobbyRepository
 import io2.hobbymatch.hobby.data.remote.HobbyApiService
 import io2.hobbymatch.hobby.data.remote.HobbyApiServiceImpl
@@ -72,6 +74,15 @@ val appModule = module {
             install(HttpTimeout) {
                 requestTimeoutMillis = 10_000L
             }
+            install(Auth) {
+                bearer {
+                    loadTokens {
+                        val accessToken = get<AuthRepository>().loadAccessToken() ?: ""
+                        val refreshToken = get<AuthRepository>().loadRefreshToken() ?: ""
+                        BearerTokens(accessToken = accessToken, refreshToken = refreshToken)
+                    }
+                }
+            }
         }
     }
 
@@ -109,9 +120,8 @@ val appModule = module {
         )
     } // ViewModel for the user screen
     factory { AuthViewModel(get<AuthRepository>()) } // ViewModel for login
-    factory { ActivityViewModel(/*get<AuthMongoDB>()*/) } // ViewModel for activity
     single {
-        BusinessClientViewModel(
+           BusinessClientViewModel(
             get<BusinessClientRepository>(),
             get<AuthRepository>()
         )

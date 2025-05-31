@@ -37,14 +37,14 @@ class MockBusinessClientApiService : BusinessClientApiService {
         val venue1 = Venue(
             id = 1,
             location = location1,
-            hostedActivities = emptyList(),
-            ownerId = mockClients[0]
+            events = emptyList(),
+            owner = mockClients[0]
         )
         val venue2 = Venue(
             id = 2,
             location = location2,
-            hostedActivities = emptyList(),
-            ownerId = mockClients[1]
+            events = emptyList(),
+            owner = mockClients[1]
         )
 
         // Dodanie Venue do listy i przypisanie do klientów
@@ -60,8 +60,8 @@ class MockBusinessClientApiService : BusinessClientApiService {
         val newVenue = Venue(
             id = (mockVenues.maxOfOrNull { it.id } ?: 0) + 1,
             location = venue.location,
-            hostedActivities = venue.hostedActivities,
-            ownerId = owner
+            events = venue.hostedActivities,
+            owner = owner
         )
 
         mockVenues.add(newVenue)

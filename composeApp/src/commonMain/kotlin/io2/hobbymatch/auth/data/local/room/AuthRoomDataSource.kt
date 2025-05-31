@@ -20,7 +20,7 @@ class AuthRoomDataSource(private val authDao: AuthDao) {
     }
 
     suspend fun loadRefreshToken(): String? {
-        return authDao.getAuthData()?.googleIdToken ?: authDao.getAuthData()?.refreshToken
+        return authDao.getAuthData()?.refreshToken ?: authDao.getAuthData()?.googleIdToken
     }
 
     suspend fun resetAllAuthData() {

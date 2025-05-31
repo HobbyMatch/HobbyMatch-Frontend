@@ -54,6 +54,7 @@ kotlin {
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.client.auth)
 
             // kotlinx serialization
             implementation(libs.kotlinx.serialization.core)

@@ -10,3 +10,14 @@ data class User(
     val id: String,
     var name: String
 )
+
+data class UserInEventDTO(
+    val id: Long,
+    val name: String,
+)
+
+fun User.toInEventDTO(): UserInEventDTO =
+    UserInEventDTO(
+        id = this.id.toLong(),
+        name = this.name,
+    )
