@@ -2,6 +2,7 @@ package io2.hobbymatch.events.presentation
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import io2.hobbymatch.auth.data.AuthRepository
 import io2.hobbymatch.events.data.EventsRepository
 import io2.hobbymatch.events.domain.Event
 import io2.hobbymatch.hobby.data.HobbyRepository
@@ -26,7 +27,8 @@ sealed class EventsUiEvent {
 class EventsViewModel (
     private val userRepository: UserRepository,
     private val hobbyRepository: HobbyRepository,
-    private val eventsRepository: EventsRepository
+    private val eventsRepository: EventsRepository,
+    private val authRepository: AuthRepository
 ) : ScreenModel {
     private val _state = MutableStateFlow(EventsScreenState())
     val state: StateFlow<EventsScreenState> = _state
@@ -39,7 +41,8 @@ class EventsViewModel (
         screenModelScope.launch { 
             _state.update { it.copy(isLoading = true, isError = false, errorMessage = null) }
             try {
-                eventsRepository.fetchAllEvents()
+                val accessToken = authRepository.loadAccessToken()
+                eventsRepository.fetchAllEvents(accessToken)
                 // Obserwujemy flow z repozytorium
                 eventsRepository.events.collect { eventsList ->
                     _state.update { it.copy(events = eventsList, isLoading = false) }

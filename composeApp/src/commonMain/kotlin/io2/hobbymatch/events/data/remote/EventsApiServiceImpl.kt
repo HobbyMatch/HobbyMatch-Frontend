@@ -40,9 +40,10 @@ class EventsApiServiceImpl(
         }.body()
     }
 
-    override suspend fun getAllEvents(): List<EventDTO> {
+    override suspend fun getAllEvents(token: String): List<EventDTO> {
         return httpClient.get {
             url(apiConfig.getEndpoint(EventsApiEndpoints.GET_ALL_EVENTS))
+            headers.append("Authorization", "Bearer $token")
         }.body()
     }
 

@@ -25,8 +25,11 @@ class EventsRepository(
     /**
      * Pobiera wszystkie eventy z API i aktualizuje lokalny stan
      */
-    suspend fun fetchAllEvents() : List<Event> {
-        val eventsFromApi = apiService.getAllEvents()
+    suspend fun fetchAllEvents(token: String? = null) : List<Event> {
+        if (token == null) {
+            throw IllegalArgumentException("Token must be provided to fetch events")
+        }
+        val eventsFromApi = apiService.getAllEvents(token)
         val mappedEvents = eventsFromApi.map { eventDTO ->
             mapEventDTOToEvent(eventDTO)
         }

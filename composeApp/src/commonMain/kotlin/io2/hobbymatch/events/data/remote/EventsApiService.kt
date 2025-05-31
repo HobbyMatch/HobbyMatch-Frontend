@@ -7,7 +7,7 @@ interface EventsApiService {
     suspend fun createEvent(event: CreateOrUpdateEventDTO): EventDTO
     suspend fun updateEvent(eventId: Long, event: CreateOrUpdateEventDTO): EventDTO
     suspend fun getEvent(eventId: Long): EventDTO
-    suspend fun getAllEvents(): List<EventDTO>
+    suspend fun getAllEvents(token: String): List<EventDTO>
     suspend fun deleteEvent(eventId: Long)
     suspend fun joinEvent(eventId: Long) : EventDTO
     suspend fun leaveEvent(eventId: Long) : EventDTO

@@ -86,10 +86,13 @@ val appModule = module {
             install(Auth) {
                 bearer {
                     loadTokens {
-                        val accessToken = get<AuthRepository>().loadAccessToken() ?: ""
-                        val refreshToken = get<AuthRepository>().loadRefreshToken() ?: ""
+                        val authRepo by lazy { get<AuthRepository>() }
+                        val accessToken = authRepo.loadAccessToken() ?: ""
+                        val refreshToken = authRepo.loadRefreshToken() ?: ""
                         BearerTokens(accessToken = accessToken, refreshToken = refreshToken)
                     }
+                    // Linijka,, aby token był wysyłany do wszystkich żądań
+                    sendWithoutRequest { true }
                 }
             }
         }
@@ -154,7 +157,8 @@ val appModule = module {
         EventsViewModel(
             get<UserRepository>(),
             get<HobbyRepository>(),
-            get<EventsRepository>()
+            get<EventsRepository>(),
+            get<AuthRepository>()
         )
     }
 }
