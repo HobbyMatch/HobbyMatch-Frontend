@@ -7,7 +7,7 @@ import io2.hobbymatch.business.data.BusinessClientRepository
 import io2.hobbymatch.business.domain.BusinessClient
 import io2.hobbymatch.business.domain.CreateVenueDTO
 import io2.hobbymatch.business.domain.Venue
-import io2.hobbymatch.events.domain.Activity
+import io2.hobbymatch.events.domain.Event
 import io2.hobbymatch.events.domain.Location
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -74,7 +74,7 @@ class BusinessClientViewModel(
         }
     }
 
-    fun addVenue(location: Location, hostedActivities: List<Activity>) {
+    fun addVenue(location: Location, hostedActivities: List<Event>) {
         screenModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             try {

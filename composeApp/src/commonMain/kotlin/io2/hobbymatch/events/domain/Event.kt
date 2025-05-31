@@ -1,10 +1,11 @@
 package io2.hobbymatch.events.domain
 
+import io2.hobbymatch.hobby.domain.Hobby
 import io2.hobbymatch.user.domain.User
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Activity(
+data class Event(
     val id: Long,
     val organizer: User,
     val participants: List<User> = emptyList(),

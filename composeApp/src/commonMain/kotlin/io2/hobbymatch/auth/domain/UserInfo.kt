@@ -1,6 +1,6 @@
 package io2.hobbymatch.auth.domain
 
-import io2.hobbymatch.events.domain.Hobby
+import io2.hobbymatch.hobby.domain.Hobby
 import kotlinx.serialization.Serializable
 
 @Serializable

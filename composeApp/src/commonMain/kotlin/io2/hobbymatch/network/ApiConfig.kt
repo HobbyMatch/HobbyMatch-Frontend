@@ -15,7 +15,6 @@ data class ApiConfig(
     fun getEndpoint(path: String): String = "$fullBaseUrl/$path"
 
     companion object {
-        // Predefined environments
         val DEVELOPMENT = ApiConfig(
             baseUrl = PlatformApiConfig.getDevelopmentBaseUrl(),
             apiVersion = "v1",
@@ -23,7 +22,7 @@ data class ApiConfig(
         )
 
         val PRODUCTION = ApiConfig(
-            baseUrl = "172.20.10.3:8080",
+            baseUrl = "192.168.0.252:8080",
             apiVersion = "v1",
             useHttps = false
         )
