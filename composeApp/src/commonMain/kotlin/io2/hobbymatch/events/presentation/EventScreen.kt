@@ -17,14 +17,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +49,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import io2.hobbymatch.events.domain.Event
@@ -72,6 +77,7 @@ class EventScreen : Screen, Tab {
     override fun Content() {
         val viewModel = koinScreenModel<EventsViewModel>()
         val state = viewModel.state.collectAsState().value
+        val navigator = LocalNavigator.currentOrThrow
         
         var selectedEvent by remember { mutableStateOf<Event?>(null) }
         
@@ -84,10 +90,31 @@ class EventScreen : Screen, Tab {
                             IconButton(onClick = { selectedEvent = null }) {
                                 Icon(Icons.Default.Close, contentDescription = "Close")
                             }
+                        } else {
+                            // Dodajemy przycisk odświeżania zamiast pull-to-refresh
+                            IconButton(onClick = { viewModel.onEvent(EventsUiEvent.LoadEvents) }) {
+                                Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                            }
                         }
                     }
                 )
             },
+            floatingActionButton = {
+                if (selectedEvent == null) {
+                    FloatingActionButton(
+                        onClick = { navigator.push(AddEventScreen()) },
+                        modifier = Modifier.padding(16.dp),
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add Event",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+            },
+            floatingActionButtonPosition = androidx.compose.material3.FabPosition.Start,
             content = { innerPadding ->
                 Box(
                     modifier = Modifier
@@ -98,12 +125,24 @@ class EventScreen : Screen, Tab {
                     if (state.isLoading) {
                         CircularProgressIndicator()
                     } else if (state.isError) {
-                        Text(
-                            text = state.errorMessage ?: "Wystąpił nieznany błąd",
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(16.dp)
-                        )
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = state.errorMessage ?: "Wystąpił nieznany błąd",
+                                color = MaterialTheme.colorScheme.error,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            IconButton(onClick = { viewModel.onEvent(EventsUiEvent.LoadEvents) }) {
+                                Icon(
+                                    Icons.Default.Refresh, 
+                                    contentDescription = "Retry",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
                     } else if (selectedEvent != null) {
                         EventDetail(event = selectedEvent!!)
                     } else if (state.events.isEmpty()) {

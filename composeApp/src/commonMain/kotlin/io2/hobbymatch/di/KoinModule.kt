@@ -21,6 +21,7 @@ import io2.hobbymatch.business.presentation.BusinessClientViewModel
 import io2.hobbymatch.events.data.EventsRepository
 import io2.hobbymatch.events.data.remote.EventsApiService
 import io2.hobbymatch.events.data.remote.EventsApiServiceImpl
+import io2.hobbymatch.events.presentation.AddEventViewModel
 import io2.hobbymatch.events.presentation.EventsViewModel
 import io2.hobbymatch.hobby.data.HobbyRepository
 import io2.hobbymatch.hobby.data.remote.HobbyApiService
@@ -159,6 +160,15 @@ val appModule = module {
             get<HobbyRepository>(),
             get<EventsRepository>(),
             get<AuthRepository>()
+        )
+    }
+
+    factory {
+        AddEventViewModel(
+            get<EventsRepository>(),
+            get<UserRepository>(),
+            get<AuthRepository>(),
+            get<HobbyRepository>()
         )
     }
 }
