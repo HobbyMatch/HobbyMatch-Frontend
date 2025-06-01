@@ -16,12 +16,14 @@ data class EventsScreenState(
     val events: List<Event> = emptyList(),
     val isLoading: Boolean = false,
     val isError: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val currentUserId: Long? = null
 )
 
 sealed class EventsUiEvent {
     data object LoadEvents : EventsUiEvent()
-    // Możesz dodać inne zdarzenia, jeśli są potrzebne
+    data class JoinEvent(val eventId: Long) : EventsUiEvent()
+    data class LeaveEvent(val eventId: Long) : EventsUiEvent()
 }
 
 class EventsViewModel (
@@ -35,6 +37,24 @@ class EventsViewModel (
 
     init {
         loadEvents()
+        loadCurrentUserId()
+    }
+
+    private fun loadCurrentUserId() {
+        screenModelScope.launch {
+            try {
+                val currentUserId = authRepository.loadAuthResponse()?.loginInfo?.id ?: throw Exception("Użytkownik nie jest zalogowany")
+                _state.update { it.copy(currentUserId = currentUserId) }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isError = true,
+                        errorMessage = e.message ?: "Nie udało się załadować użytkownika",
+                        isLoading = false
+                    )
+                }
+            }
+        }
     }
 
     private fun loadEvents() {
@@ -62,6 +82,60 @@ class EventsViewModel (
     fun onEvent(event: EventsUiEvent) {
         when (event) {
             is EventsUiEvent.LoadEvents -> loadEvents()
+            is EventsUiEvent.JoinEvent -> joinEvent(event.eventId)
+            is EventsUiEvent.LeaveEvent -> leaveEvent(event.eventId)
         }
+    }
+    
+    private fun joinEvent(eventId: Long) {
+        screenModelScope.launch {
+            _state.update { it.copy(isLoading = true, isError = false) }
+            try {
+                val accessToken = authRepository.loadAccessToken() ?: throw Exception("Użytkownik nie jest zalogowany")
+                eventsRepository.joinEvent(eventId, accessToken)
+                _state.update { it.copy(isLoading = false) }
+            } catch (e: Exception) {
+                _state.update { 
+                    it.copy(
+                        isError = true,
+                        errorMessage = e.message ?: "Nie udało się dołączyć do wydarzenia",
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
+    
+    private fun leaveEvent(eventId: Long) {
+        screenModelScope.launch {
+            _state.update { it.copy(isLoading = true, isError = false) }
+            try {
+                val accessToken = authRepository.loadAccessToken() ?: throw Exception("Użytkownik nie jest zalogowany")
+                eventsRepository.leaveEvent(eventId, accessToken)
+                _state.update { it.copy(isLoading = false) }
+            } catch (e: Exception) {
+                _state.update { 
+                    it.copy(
+                        isError = true,
+                        errorMessage = e.message ?: "Nie udało się opuścić wydarzenia",
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
+    
+    fun isCurrentUserParticipant(event: Event): Boolean {
+        val currentUserId = _state.value.currentUserId
+        return event.participants.any { participant -> participant.id == currentUserId }
+    }
+    
+    fun isCurrentUserOrganizer(event: Event): Boolean {
+        val currentUserId = _state.value.currentUserId
+        return currentUserId == event.organizer.id
+    }
+    
+    fun getCurrentUserId(): Long? {
+        return  _state.value.currentUserId
     }
 }

@@ -103,8 +103,8 @@ class EventsRepository(
     /**
      * Dołącza użytkownika do eventu
      */
-    suspend fun joinEvent(eventId: Long): Event {
-        val eventDTO = apiService.joinEvent(eventId)
+    suspend fun joinEvent(eventId: Long, accessToken: String): Event {
+        val eventDTO = apiService.joinEvent(eventId, accessToken)
         val updatedEvent = mapEventDTOToEvent(eventDTO)
         
         // Aktualizuje lokalną listę eventów
@@ -125,8 +125,8 @@ class EventsRepository(
     /**
      * Wycofuje użytkownika z eventu
      */
-    suspend fun leaveEvent(eventId: Long): Event {
-        val eventDTO = apiService.leaveEvent(eventId)
+    suspend fun leaveEvent(eventId: Long, accessToken: String): Event {
+        val eventDTO = apiService.leaveEvent(eventId, accessToken)
         val updatedEvent = mapEventDTOToEvent(eventDTO)
         
         // Aktualizuje lokalną listę eventów

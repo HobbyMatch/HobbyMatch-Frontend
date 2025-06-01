@@ -248,7 +248,11 @@ class EventScreen : Screen, Tab {
 
     @Composable
     private fun EventDetail(event: Event) {
+        val viewModel = koinScreenModel<EventsViewModel>()
         val scrollState = rememberScrollState()
+        
+        val isUserParticipant = viewModel.isCurrentUserParticipant(event)
+        val isUserOrganizer = viewModel.isCurrentUserOrganizer(event)
         
         Column(
             modifier = Modifier
@@ -262,6 +266,42 @@ class EventScreen : Screen, Tab {
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
+            
+            // Przycisk dołączania/opuszczania wydarzenia
+            if (!isUserOrganizer) {
+                if (event.participants.size >= event.maxUsers && !isUserParticipant) {
+                    // Wydarzenie jest pełne
+                    androidx.compose.material3.Button(
+                        onClick = { },
+                        enabled = false,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Wydarzenie jest pełne")
+                    }
+                } else if (isUserParticipant) {
+                    androidx.compose.material3.OutlinedButton(
+                        onClick = { viewModel.onEvent(EventsUiEvent.LeaveEvent(event.id)) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Zrezygnuj z uczestnictwa")
+                    }
+                } else {
+                    androidx.compose.material3.Button(
+                        onClick = { viewModel.onEvent(EventsUiEvent.JoinEvent(event.id)) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Dołącz do wydarzenia")
+                    }
+                }
+            } else {
+                Text(
+                    text = "Jesteś organizatorem tego wydarzenia",
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                )
+            }
             
             Card(
                 modifier = Modifier.fillMaxWidth(),

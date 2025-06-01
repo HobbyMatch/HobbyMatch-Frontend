@@ -62,17 +62,19 @@ class EventsApiServiceImpl(
         }
     }
 
-    override suspend fun joinEvent(eventId: Long): EventDTO {
+    override suspend fun joinEvent(eventId: Long, accessToken: String): EventDTO {
         return httpClient.post {
             url(apiConfig.getEndpoint(EventsApiEndpoints.JOIN_EVENT.replace("{eventId}", eventId.toString())))
             contentType(ContentType.Application.Json)
+            headers.append("Authorization", "Bearer $accessToken")
         }.body()
     }
 
-    override suspend fun leaveEvent(eventId: Long): EventDTO {
+    override suspend fun leaveEvent(eventId: Long, accessToken: String): EventDTO {
         return httpClient.post {
             url(apiConfig.getEndpoint(EventsApiEndpoints.LEAVE_EVENT.replace("{eventId}", eventId.toString())))
             contentType(ContentType.Application.Json)
+            headers.append("Authorization", "Bearer $accessToken")
         }.body()
     }
 }

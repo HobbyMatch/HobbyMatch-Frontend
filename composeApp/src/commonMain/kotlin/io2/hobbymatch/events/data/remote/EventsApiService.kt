@@ -9,6 +9,6 @@ interface EventsApiService {
     suspend fun getEvent(eventId: Long): EventDTO
     suspend fun getAllEvents(token: String): List<EventDTO>
     suspend fun deleteEvent(eventId: Long)
-    suspend fun joinEvent(eventId: Long) : EventDTO
-    suspend fun leaveEvent(eventId: Long) : EventDTO
+    suspend fun joinEvent(eventId: Long, accessToken: String) : EventDTO
+    suspend fun leaveEvent(eventId: Long, accessToken: String) : EventDTO
 }
