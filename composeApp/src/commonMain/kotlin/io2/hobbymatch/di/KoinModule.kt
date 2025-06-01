@@ -16,7 +16,7 @@ import io2.hobbymatch.auth.data.remote.AuthApiServiceImpl
 import io2.hobbymatch.auth.presentation.AuthViewModel
 import io2.hobbymatch.business.data.BusinessClientRepository
 import io2.hobbymatch.business.data.remote.BusinessClientApiService
-import io2.hobbymatch.business.data.remote.MockBusinessClientApiService
+import io2.hobbymatch.business.data.remote.BusinessClientApiServiceImpl
 import io2.hobbymatch.business.presentation.BusinessClientViewModel
 import io2.hobbymatch.events.data.EventsRepository
 import io2.hobbymatch.events.data.remote.EventsApiService
@@ -105,7 +105,10 @@ val appModule = module {
         httpClient = get<HttpClient>(),
         apiConfig = get<ApiConfig>()
     ) }
-    single<BusinessClientApiService> { MockBusinessClientApiService() }
+    single<BusinessClientApiService> { BusinessClientApiServiceImpl(
+        httpClient = get<HttpClient>(),
+        apiConfig = get<ApiConfig>()
+    ) }
     single<HobbyApiService> { HobbyApiServiceImpl(
         httpClient = get<HttpClient>(),
         apiConfig = get<ApiConfig>(),

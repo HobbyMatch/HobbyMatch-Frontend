@@ -313,7 +313,7 @@ class EventScreen : Screen, Tab {
                     Row {
                         // Dodajemy przycisk edycji wydarzenia
                         androidx.compose.material3.Button(
-                            onClick = { navigator.push(AddEventScreen()) },
+                            onClick = { navigator.pop() },
                             colors = androidx.compose.material3.ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary
                             ),
