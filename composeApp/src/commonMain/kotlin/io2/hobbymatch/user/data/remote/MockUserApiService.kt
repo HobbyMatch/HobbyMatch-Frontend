@@ -35,7 +35,7 @@ class MockUserApiService : UserApiService {
         )
     )
 
-    override suspend fun getAuthenticatedUser(): User {
+    override suspend fun getAuthenticatedUser(accessToken: String): User {
         delay(500) // Simulate network delay
         return mockAuthenticatedUser
     }

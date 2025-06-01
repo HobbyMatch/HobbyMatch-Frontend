@@ -21,6 +21,7 @@ data class AddEventState(
     val titleError: String? = null,
     
     val description: String = "",
+    val descriptionError: String? = null,
     
     val startTime: String = "",
     val startTimeError: String? = null,
@@ -90,7 +91,10 @@ class AddEventViewModel(
                 ) }
             }
             is AddEventEvent.DescriptionChanged -> {
-                _state.update { it.copy(description = event.description) }
+                _state.update { it.copy(
+                    description = event.description,
+                    descriptionError = if (event.description.isBlank()) "Opis jest wymagany" else null
+                ) }
             }
             is AddEventEvent.StartTimeChanged -> {
                 _state.update { it.copy(
@@ -105,21 +109,27 @@ class AddEventViewModel(
                 ) }
             }
             is AddEventEvent.LatitudeChanged -> {
+                // Zamiana przecinka na kropkę
+                val processedLatitude = event.latitude.replace(',', '.')
                 _state.update { it.copy(
-                    latitude = event.latitude,
-                    locationError = validateLocation(event.latitude, state.value.longitude)
+                    latitude = processedLatitude,
+                    locationError = validateLocation(processedLatitude, state.value.longitude)
                 ) }
             }
             is AddEventEvent.LongitudeChanged -> {
+                // Zamiana przecinka na kropkę
+                val processedLongitude = event.longitude.replace(',', '.')
                 _state.update { it.copy(
-                    longitude = event.longitude,
-                    locationError = validateLocation(state.value.latitude, event.longitude)
+                    longitude = processedLongitude,
+                    locationError = validateLocation(state.value.latitude, processedLongitude)
                 ) }
             }
             is AddEventEvent.PriceChanged -> {
+                // Zamiana przecinka na kropkę również dla ceny
+                val processedPrice = event.price.replace(',', '.')
                 _state.update { it.copy(
-                    price = event.price,
-                    priceError = validatePrice(event.price)
+                    price = processedPrice,
+                    priceError = validatePrice(processedPrice)
                 ) }
             }
             is AddEventEvent.MinUsersChanged -> {
@@ -188,6 +198,7 @@ class AddEventViewModel(
         
         // Walidacja wszystkich pól
         val titleError = if (currentState.title.isBlank()) "Tytuł jest wymagany" else null
+        val descriptionError = if (currentState.description.isBlank()) "Opis jest wymagany" else null
         val startTimeError = validateDateTime(currentState.startTime)
         val endTimeError = validateDateTime(currentState.endTime)
         val locationError = validateLocation(currentState.latitude, currentState.longitude)
@@ -200,6 +211,7 @@ class AddEventViewModel(
         // Aktualizacja stanu z błędami
         _state.update { it.copy(
             titleError = titleError,
+            descriptionError = descriptionError,
             startTimeError = startTimeError,
             endTimeError = endTimeError,
             locationError = locationError,
@@ -209,32 +221,37 @@ class AddEventViewModel(
         ) }
         
         // Sprawdzenie czy są jakiekolwiek błędy
-        if (titleError != null || startTimeError != null || endTimeError != null || 
-            locationError != null || priceError != null || hobbiesError != null || usersError != null) {
+        if (titleError != null || descriptionError != null || startTimeError != null || 
+            endTimeError != null || locationError != null || priceError != null || hobbiesError != null || usersError != null) {
             return
         }
         
         // Pobieranie danych użytkownika
         screenModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            
+
             try {
-                val currentUser = userRepository.loadAuthenticatedUser() ?: throw Exception("Użytkownik nie jest zalogowany")
-                
-                val latitude = currentState.latitude.toDoubleOrNull() ?: 0.0
-                val longitude = currentState.longitude.toDoubleOrNull() ?: 0.0
-                val price = currentState.price.toDoubleOrNull() ?: 0.0
+                val accessToken = authRepository.loadAccessToken() ?: throw Exception("Użytkownik nie jest zalogowany")
+                println("[ADD EVENT SCREEN] Loaded access token: $accessToken")
+
+                val currentUser = authRepository.loadAuthResponse()?.loginInfo ?: throw Exception("Użytkownik nie jest zalogowany")
+                println("[ADD EVENT SCREEN] Current user: $currentUser")
+
+                // Użyj przetworzonych wartości z przecinkami zamienionymi na kropki
+                val latitude = currentState.latitude.replace(',', '.').toDoubleOrNull() ?: 0.0
+                val longitude = currentState.longitude.replace(',', '.').toDoubleOrNull() ?: 0.0
+                val price = currentState.price.replace(',', '.').toDoubleOrNull() ?: 0.0
                 
                 // Utworzenie obiektu Event
                 val newEvent = Event(
                     id = 0, // ID zostanie nadane przez serwer
                     organizer = UserInEvent(
-                        id = currentUser.id.toLong(),
+                        id = currentUser.id,
                         name = currentUser.name
                     ),
                     participants = emptyList(), // Początkowo nie ma uczestników
                     title = currentState.title,
-                    description = currentState.description.takeIf { it.isNotBlank() },
+                    description = currentState.description,
                     location = Location(
                         latitude = latitude,
                         longitude = longitude
@@ -246,10 +263,13 @@ class AddEventViewModel(
                     minUsers = currentState.minUsers,
                     maxUsers = currentState.maxUsers
                 )
-                
+                println("[ADD EVENT SCREEN] New event: $newEvent")
+
                 // Wywołanie repozytorium do utworzenia eventu
-                val createdEvent = eventsRepository.createEvent(newEvent)
-                
+                val createdEvent = eventsRepository.createEvent(newEvent, accessToken)
+
+                println("[ADD EVENT SCREEN] Created event! : $createdEvent")
+
                 // Aktualizacja stanu
                 _state.update { it.copy(
                     isLoading = false,
@@ -284,8 +304,12 @@ class AddEventViewModel(
             return "Lokalizacja jest wymagana"
         }
         
-        val lat = latitude.toDoubleOrNull()
-        val lon = longitude.toDoubleOrNull()
+        // Zamiana przecinków na kropki przed parsowaniem
+        val processedLatitude = latitude.replace(',', '.')
+        val processedLongitude = longitude.replace(',', '.')
+        
+        val lat = processedLatitude.toDoubleOrNull()
+        val lon = processedLongitude.toDoubleOrNull()
         
         if (lat == null || lon == null) {
             return "Wprowadź poprawne wartości liczbowe"
@@ -307,7 +331,10 @@ class AddEventViewModel(
             return "Cena jest wymagana"
         }
         
-        val priceValue = price.toDoubleOrNull()
+        // Zamiana przecinków na kropki przed parsowaniem
+        val processedPrice = price.replace(',', '.')
+        val priceValue = processedPrice.toDoubleOrNull()
+        
         if (priceValue == null) {
             return "Wprowadź poprawną wartość liczbową"
         }

@@ -47,6 +47,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class UserScreen : Screen, Tab {
 
@@ -64,6 +65,7 @@ class UserScreen : Screen, Tab {
             }
         }
 
+    @Preview
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
     @Composable
     override fun Content() {

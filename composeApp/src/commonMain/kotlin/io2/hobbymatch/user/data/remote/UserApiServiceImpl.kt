@@ -17,9 +17,10 @@ class UserApiServiceImpl(
     private val apiConfig: ApiConfig
 ) : UserApiService {
 
-    override suspend fun getAuthenticatedUser(): User {
+    override suspend fun getAuthenticatedUser(accessToken: String): User {
         return httpClient.get {
             url(apiConfig.getEndpoint(UserApiEndpoints.GET_ME))
+            headers.append("Authorization", "Bearer $accessToken")
         }.body()
     }
 

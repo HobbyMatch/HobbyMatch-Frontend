@@ -15,10 +15,11 @@ class UserRepository(
     /**
      * Fetch the authenticated user from API and update the local database.
      */
-    suspend fun syncAuthenticatedUser(): User {
-        val userFromApi = apiService.getAuthenticatedUser()
+    suspend fun syncAuthenticatedUser(accessToken: String): User {
+        val userFromApi = apiService.getAuthenticatedUser(accessToken)
         // Save user to local storage
         userRoomDataSource.saveUserProfile(
+            id = userFromApi.id,
             name = userFromApi.name,
             email = userFromApi.email,
             hobbies = userFromApi.hobbies.map { it.name }
@@ -72,6 +73,7 @@ class UserRepository(
         val updatedUserFromApi = apiService.updateAuthenticatedUser(updateRequest)
         // Save updates to local storage
         userRoomDataSource.saveUserProfile(
+            id = updatedUserFromApi.id,
             name = updatedUserFromApi.name,
             email = updatedUserFromApi.email,
             hobbies = updatedUserFromApi.hobbies.map { it.name }
@@ -83,7 +85,14 @@ class UserRepository(
      * Fetch a specific user by ID from the API.
      */
     suspend fun getUserById(userId: String, token: String?): User {
-        return apiService.getUserById(userId, token)
+        val user = apiService.getUserById(userId, token)
+        userRoomDataSource.saveUserProfile(
+            id = user.id,
+            name = user.name,
+            email = user.email,
+            hobbies = user.hobbies.map { it.name }
+        )
+        return user
     }
 
     /**
@@ -95,6 +104,13 @@ class UserRepository(
             name = user.name,
             email = user.email,
             hobbies = user.hobbies
+        )
+        // Save in local storage
+        userRoomDataSource.saveUserProfile(
+            id = userId,
+            name = user.name,
+            email = user.email,
+            hobbies = user.hobbies.map { it.name }
         )
         return apiService.updateUserById(userId, updateRequest, token)
     }

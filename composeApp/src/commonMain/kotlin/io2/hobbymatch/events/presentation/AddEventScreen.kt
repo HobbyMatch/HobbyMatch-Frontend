@@ -181,9 +181,11 @@ class AddEventScreen : Screen, Tab {
                         OutlinedTextField(
                             value = state.description,
                             onValueChange = { viewModel.onEvent(AddEventEvent.DescriptionChanged(it)) },
-                            label = { Text("Opis wydarzenia") },
+                            label = { Text("Opis wydarzenia*") },
                             modifier = Modifier.fillMaxWidth(),
-                            minLines = 3
+                            minLines = 3,
+                            isError = state.descriptionError != null,
+                            supportingText = { state.descriptionError?.let { Text(it) } }
                         )
                         
                         // Data i czas rozpoczęcia
@@ -299,7 +301,8 @@ class AddEventScreen : Screen, Tab {
                                     label = { Text("Szerokość geograficzna") },
                                     modifier = Modifier.fillMaxWidth(),
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                                    isError = state.locationError != null
+                                    isError = state.locationError != null,
+                                    supportingText = { Text("Użyj kropki lub przecinka jako separatora dziesiętnego") }
                                 )
                                 
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -310,7 +313,8 @@ class AddEventScreen : Screen, Tab {
                                     label = { Text("Długość geograficzna") },
                                     modifier = Modifier.fillMaxWidth(),
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                                    isError = state.locationError != null
+                                    isError = state.locationError != null,
+                                    supportingText = { Text("Użyj kropki lub przecinka jako separatora dziesiętnego") }
                                 )
                                 
                                 state.locationError?.let {
@@ -332,7 +336,13 @@ class AddEventScreen : Screen, Tab {
                             modifier = Modifier.fillMaxWidth(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             isError = state.priceError != null,
-                            supportingText = { state.priceError?.let { Text(it) } }
+                            supportingText = { 
+                                if (state.priceError != null) {
+                                    Text(state.priceError)
+                                } else {
+                                    Text("Użyj kropki lub przecinka jako separatora dziesiętnego")
+                                }
+                            }
                         )
                         
                         // Liczba uczestników
@@ -358,8 +368,8 @@ class AddEventScreen : Screen, Tab {
                             Slider(
                                 value = state.maxUsers.toFloat(),
                                 onValueChange = { viewModel.onEvent(AddEventEvent.MaxUsersChanged(it.roundToInt())) },
-                                valueRange = state.minUsers.toFloat()..100f,
-                                steps = 99 - state.minUsers
+                                valueRange = state.minUsers.toFloat()..50f,
+                                steps = 48 - state.minUsers
                             )
                             
                             state.usersError?.let {

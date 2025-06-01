@@ -18,12 +18,21 @@ class EventsApiServiceImpl(
     private val httpClient: HttpClient,
     private val apiConfig: ApiConfig
 ) : EventsApiService {
-    override suspend fun createEvent(event: CreateOrUpdateEventDTO): EventDTO {
-        return httpClient.post {
+    override suspend fun createEvent(event: CreateOrUpdateEventDTO, accessToken: String): EventDTO {
+        println("[EVENTS API]: Creating event with access token: $accessToken")
+        println("[EVENTS API]: Event body: $event")
+
+        val response = httpClient.post {
             url(apiConfig.getEndpoint(EventsApiEndpoints.CREATE_EVENT))
             contentType(ContentType.Application.Json)
             setBody(event)
-        }.body()
+            headers.append("Authorization", "Bearer $accessToken")
+        }
+        
+        println("[EVENTS API]: Response status: ${response.status}")
+        println("[EVENTS API]: Response body: ${response.body<String>()}")
+
+        return response.body()
     }
 
     override suspend fun updateEvent(eventId: Long, event: CreateOrUpdateEventDTO): EventDTO {

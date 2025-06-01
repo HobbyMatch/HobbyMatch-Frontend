@@ -49,8 +49,8 @@ class EventsRepository(
     /**
      * Tworzy nowy event
      */
-    suspend fun createEvent(event: Event): Event {
-        val eventDTO = apiService.createEvent(mapEventToCreateDTO(event))
+    suspend fun createEvent(event: Event, accessToken: String): Event {
+        val eventDTO = apiService.createEvent(mapEventToCreateDTO(event), accessToken)
         val createdEvent = mapEventDTOToEvent(eventDTO)
         
         // Aktualizuje lokalną listę eventów dodając nowy event

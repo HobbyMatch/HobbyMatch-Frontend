@@ -113,31 +113,6 @@ class UserViewModel(
     }
 
     /**
-     * Observes user profile from local storage and updates the state.
-     */
-//    private fun loadUserProfile() {
-//        screenModelScope.launch {
-//            userRepository.observeAuthenticatedUser()
-//                .catch { handleError(it) } // Handle any errors while observing the flow
-//                .onEach { user ->
-//                    if (user != null) {
-//                        _state.update { currentState ->
-//                            currentState.copy(
-//                                email = user.email,
-//                                name = user.name,
-//                                hobbies = user.hobbies,
-//                                isLoading = false,
-//                                isError = false,
-//                                errorMessage = null
-//                            )
-//                        }
-//                    }
-//                }
-//                .launchIn(screenModelScope)
-//        }
-//    }
-
-    /**
      * Handles user events and updates accordingly.
      */
     fun onEvent(event: UserUiEvent) {
