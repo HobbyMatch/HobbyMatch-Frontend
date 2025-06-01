@@ -20,9 +20,12 @@ import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,13 +35,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +64,7 @@ import cafe.adriel.voyager.navigator.tab.TabOptions
 import io2.hobbymatch.events.domain.Event
 import io2.hobbymatch.events.domain.Location
 import io2.hobbymatch.hobby.domain.Hobby
+import kotlinx.coroutines.launch
 
 class EventScreen : Screen, Tab {
     override val options: TabOptions
@@ -80,6 +89,20 @@ class EventScreen : Screen, Tab {
         val navigator = LocalNavigator.currentOrThrow
         
         var selectedEvent by remember { mutableStateOf<Event?>(null) }
+        val snackbarHostState = remember { SnackbarHostState() }
+        val scope = rememberCoroutineScope()
+        
+        // Obsługa wyświetlania Snackbara
+        LaunchedEffect(state.showSnackbar) {
+            if (state.showSnackbar) {
+                scope.launch {
+                    snackbarHostState.showSnackbar(state.snackbarMessage)
+                }
+                viewModel.hideSnackbar()
+                // Jeśli pokazujemy Snackbar po akcji, wróćmy do listy wydarzeń
+                selectedEvent = null
+            }
+        }
         
         Scaffold(
             topBar = {
@@ -115,6 +138,9 @@ class EventScreen : Screen, Tab {
                 }
             },
             floatingActionButtonPosition = androidx.compose.material3.FabPosition.Start,
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState)
+            },
             content = { innerPadding ->
                 Box(
                     modifier = Modifier
@@ -250,9 +276,12 @@ class EventScreen : Screen, Tab {
     private fun EventDetail(event: Event) {
         val viewModel = koinScreenModel<EventsViewModel>()
         val scrollState = rememberScrollState()
+        val navigator = LocalNavigator.currentOrThrow
         
         val isUserParticipant = viewModel.isCurrentUserParticipant(event)
         val isUserOrganizer = viewModel.isCurrentUserOrganizer(event)
+        
+        var showDeleteConfirmDialog by remember { mutableStateOf(false) }
         
         Column(
             modifier = Modifier
@@ -267,8 +296,54 @@ class EventScreen : Screen, Tab {
                 fontWeight = FontWeight.Bold
             )
             
-            // Przycisk dołączania/opuszczania wydarzenia
-            if (!isUserOrganizer) {
+            // Przycisk dołączania/opuszczania wydarzenia lub usuwania dla organizatora
+            if (isUserOrganizer) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Jesteś organizatorem tego wydarzenia",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    Row {
+                        // Dodajemy przycisk edycji wydarzenia
+                        androidx.compose.material3.Button(
+                            onClick = { navigator.push(AddEventScreen()) },
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            ),
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = "Edytuj wydarzenie",
+                                modifier = Modifier.padding(end = 4.dp)
+                            )
+                            Text("Edytuj")
+                        }
+
+                        // Przycisk usuwania (istniejący)
+                        androidx.compose.material3.Button(
+                            onClick = { showDeleteConfirmDialog = true },
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = "Usuń wydarzenie",
+                                modifier = Modifier.padding(end = 4.dp)
+                            )
+                            Text("Usuń")
+                        }
+                    }
+                }
+            } else {
                 if (event.participants.size >= event.maxUsers && !isUserParticipant) {
                     // Wydarzenie jest pełne
                     androidx.compose.material3.Button(
@@ -293,14 +368,6 @@ class EventScreen : Screen, Tab {
                         Text("Dołącz do wydarzenia")
                     }
                 }
-            } else {
-                Text(
-                    text = "Jesteś organizatorem tego wydarzenia",
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
-                )
             }
             
             Card(
@@ -487,6 +554,31 @@ class EventScreen : Screen, Tab {
                     }
                 }
             }
+        }
+        
+        // Dialog potwierdzający usunięcie wydarzenia
+        if (showDeleteConfirmDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteConfirmDialog = false },
+                title = { Text("Potwierdź usunięcie") },
+                text = { Text("Czy na pewno chcesz usunąć to wydarzenie? Tej operacji nie można cofnąć.") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            viewModel.onEvent(EventsUiEvent.DeleteEvent(event.id))
+                            showDeleteConfirmDialog = false
+                            // Nie musimy już jawnie nawigować, ponieważ obsługujemy to przez LaunchedEffect
+                        }
+                    ) {
+                        Text("Usuń", color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteConfirmDialog = false }) {
+                        Text("Anuluj")
+                    }
+                }
+            )
         }
     }
 

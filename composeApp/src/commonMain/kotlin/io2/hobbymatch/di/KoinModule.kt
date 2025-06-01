@@ -171,4 +171,5 @@ val appModule = module {
             get<HobbyRepository>()
         )
     }
+
 }

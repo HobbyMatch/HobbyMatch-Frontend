@@ -35,11 +35,20 @@ class EventsApiServiceImpl(
         return response.body()
     }
 
-    override suspend fun updateEvent(eventId: Long, event: CreateOrUpdateEventDTO): EventDTO {
+//    override suspend fun updateEvent(eventId: Long, event: CreateOrUpdateEventDTO): EventDTO {
+//        return httpClient.put {
+//            url(apiConfig.getEndpoint(EventsApiEndpoints.UPDATE_EVENT.replace("{eventId}", eventId.toString())))
+//            contentType(ContentType.Application.Json)
+//            setBody(event)
+//        }.body()
+//    }
+
+    override suspend fun updateEvent(eventId: Long, event: CreateOrUpdateEventDTO, accessToken: String): EventDTO {
         return httpClient.put {
             url(apiConfig.getEndpoint(EventsApiEndpoints.UPDATE_EVENT.replace("{eventId}", eventId.toString())))
             contentType(ContentType.Application.Json)
             setBody(event)
+            headers.append("Authorization", "Bearer $accessToken")
         }.body()
     }
 
@@ -49,16 +58,17 @@ class EventsApiServiceImpl(
         }.body()
     }
 
-    override suspend fun getAllEvents(token: String): List<EventDTO> {
+    override suspend fun getAllEvents(accessToken: String): List<EventDTO> {
         return httpClient.get {
             url(apiConfig.getEndpoint(EventsApiEndpoints.GET_ALL_EVENTS))
-            headers.append("Authorization", "Bearer $token")
+            headers.append("Authorization", "Bearer $accessToken")
         }.body()
     }
 
-    override suspend fun deleteEvent(eventId: Long) {
+    override suspend fun deleteEvent(eventId: Long, accessToken: String) {
         httpClient.delete {
             url(apiConfig.getEndpoint(EventsApiEndpoints.DELETE_EVENT.replace("{eventId}", eventId.toString())))
+            headers.append("Authorization", "Bearer $accessToken")
         }
     }
 

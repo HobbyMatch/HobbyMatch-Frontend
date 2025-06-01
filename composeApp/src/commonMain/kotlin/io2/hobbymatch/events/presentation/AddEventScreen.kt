@@ -69,7 +69,7 @@ import io2.hobbymatch.hobby.domain.Hobby
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-class AddEventScreen : Screen, Tab {
+class AddEventScreen() : Screen, Tab {
     override val options: TabOptions
         @Composable
         get() {

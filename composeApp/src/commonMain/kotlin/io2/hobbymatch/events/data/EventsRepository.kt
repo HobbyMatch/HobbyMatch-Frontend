@@ -64,8 +64,8 @@ class EventsRepository(
     /**
      * Aktualizuje istniejący event
      */
-    suspend fun updateEvent(event: Event): Event {
-        val eventDTO = apiService.updateEvent(event.id, mapEventToCreateDTO(event))
+    suspend fun updateEvent(event: Event, accessToken: String): Event {
+        val eventDTO = apiService.updateEvent(event.id, mapEventToCreateDTO(event), accessToken)
         val updatedEvent = mapEventDTOToEvent(eventDTO)
         
         // Aktualizuje lokalną listę eventów
@@ -86,8 +86,8 @@ class EventsRepository(
     /**
      * Usuwa event
      */
-    suspend fun deleteEvent(eventId: Long) {
-        apiService.deleteEvent(eventId)
+    suspend fun deleteEvent(eventId: Long, accessToken: String) {
+        apiService.deleteEvent(eventId, accessToken)
         
         // Usuwa event z lokalnej listy
         _events.update { currentEvents ->

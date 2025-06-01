@@ -17,13 +17,16 @@ data class EventsScreenState(
     val isLoading: Boolean = false,
     val isError: Boolean = false,
     val errorMessage: String? = null,
-    val currentUserId: Long? = null
+    val currentUserId: Long? = null,
+    val showSnackbar: Boolean = false,
+    val snackbarMessage: String = ""
 )
 
 sealed class EventsUiEvent {
     data object LoadEvents : EventsUiEvent()
     data class JoinEvent(val eventId: Long) : EventsUiEvent()
     data class LeaveEvent(val eventId: Long) : EventsUiEvent()
+    data class DeleteEvent(val eventId: Long) : EventsUiEvent()
 }
 
 class EventsViewModel (
@@ -84,6 +87,7 @@ class EventsViewModel (
             is EventsUiEvent.LoadEvents -> loadEvents()
             is EventsUiEvent.JoinEvent -> joinEvent(event.eventId)
             is EventsUiEvent.LeaveEvent -> leaveEvent(event.eventId)
+            is EventsUiEvent.DeleteEvent -> deleteEvent(event.eventId)
         }
     }
     
@@ -93,13 +97,19 @@ class EventsViewModel (
             try {
                 val accessToken = authRepository.loadAccessToken() ?: throw Exception("Użytkownik nie jest zalogowany")
                 eventsRepository.joinEvent(eventId, accessToken)
-                _state.update { it.copy(isLoading = false) }
+                _state.update { it.copy(
+                    isLoading = false,
+                    showSnackbar = true,
+                    snackbarMessage = "Dołączono do wydarzenia"
+                ) }
             } catch (e: Exception) {
                 _state.update { 
                     it.copy(
                         isError = true,
                         errorMessage = e.message ?: "Nie udało się dołączyć do wydarzenia",
-                        isLoading = false
+                        isLoading = false,
+                        showSnackbar = true,
+                        snackbarMessage = "Błąd: Nie udało się dołączyć do wydarzenia"
                     )
                 }
             }
@@ -112,17 +122,55 @@ class EventsViewModel (
             try {
                 val accessToken = authRepository.loadAccessToken() ?: throw Exception("Użytkownik nie jest zalogowany")
                 eventsRepository.leaveEvent(eventId, accessToken)
-                _state.update { it.copy(isLoading = false) }
+                _state.update { it.copy(
+                    isLoading = false,
+                    showSnackbar = true,
+                    snackbarMessage = "Zrezygnowano z uczestnictwa"
+                ) }
             } catch (e: Exception) {
                 _state.update { 
                     it.copy(
                         isError = true,
                         errorMessage = e.message ?: "Nie udało się opuścić wydarzenia",
-                        isLoading = false
+                        isLoading = false,
+                        showSnackbar = true,
+                        snackbarMessage = "Błąd: Nie udało się opuścić wydarzenia"
                     )
                 }
             }
         }
+    }
+    
+    private fun deleteEvent(eventId: Long) {
+        screenModelScope.launch {
+            _state.update { it.copy(isLoading = true, isError = false) }
+            try {
+                val accessToken = authRepository.loadAccessToken() ?: throw Exception("Użytkownik nie jest zalogowany")
+                eventsRepository.deleteEvent(eventId, accessToken)
+                _state.update { it.copy(
+                    isLoading = false,
+                    showSnackbar = true,
+                    snackbarMessage = "Wydarzenie zostało usunięte"
+                ) }
+                // Po usunięciu wydarzenia odświeżamy listę
+                loadEvents()
+            } catch (e: Exception) {
+                _state.update { 
+                    it.copy(
+                        isError = true,
+                        errorMessage = e.message ?: "Nie udało się usunąć wydarzenia",
+                        isLoading = false,
+                        showSnackbar = true,
+                        snackbarMessage = "Błąd: Nie udało się usunąć wydarzenia"
+                    )
+                }
+            }
+        }
+    }
+    
+    // Funkcja do ukrywania Snackbara po wyświetleniu
+    fun hideSnackbar() {
+        _state.update { it.copy(showSnackbar = false) }
     }
     
     fun isCurrentUserParticipant(event: Event): Boolean {
