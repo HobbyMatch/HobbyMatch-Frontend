@@ -15,6 +15,10 @@ class AuthRoomDataSource(private val authDao: AuthDao) {
         }
     }
 
+    suspend fun loadGoogleIdToken(): String? {
+        return authDao.getAuthData()?.googleIdToken
+    }
+
     suspend fun loadAccessToken(): String? {
         return authDao.getAuthData()?.accessToken ?: authDao.getAuthData()?.googleIdToken
     }

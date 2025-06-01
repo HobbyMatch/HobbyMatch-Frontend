@@ -10,9 +10,13 @@ class AuthRepository(
     private val authApiService: AuthApiService,
     private val authRoomDataSource: AuthRoomDataSource
 ) {
-    suspend fun validateToken(token: String, role: String = "USER"): AuthResponse {
+    suspend fun validateGoogleIdToken(token: String, role: String = "USER"): AuthResponse {
         println("Validating token: $token with role: $role ...")
         return authApiService.validateGoogleIdToken(token, role = role)
+    }
+
+    suspend fun loadGoogleIdToken(): String? {
+        return authRoomDataSource.loadGoogleIdToken()
     }
 
     // Login with Google and store token locally

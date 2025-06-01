@@ -33,7 +33,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ScreenModel {
 
    init {
        screenModelScope.launch {
-           val token = authRepository.loadAccessToken()
+           val token = authRepository.loadGoogleIdToken()
            val role = authRepository.loadRole() // Pobranie roli
            if (!token.isNullOrEmpty() && !role.isNullOrEmpty()) {
                if (role == "BUSINESS") {
@@ -60,7 +60,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ScreenModel {
         screenModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             try {
-                val response = authRepository.validateToken(token, "BUSINESS") // Call repository function
+                val response = authRepository.validateGoogleIdToken(token, "BUSINESS") // Call repository function
                 authRepository.saveAuthResponse(response, "BUSINESS")
                 // print response
                 println(response)
@@ -94,7 +94,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ScreenModel {
         screenModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             try {
-                val response = authRepository.validateToken(token) // Call repository function
+                val response = authRepository.validateGoogleIdToken(token) // Call repository function
                 authRepository.saveAuthResponse(response, "USER")
                 // print response
                 println(response)
