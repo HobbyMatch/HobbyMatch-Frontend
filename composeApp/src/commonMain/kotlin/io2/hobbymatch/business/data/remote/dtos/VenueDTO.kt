@@ -2,7 +2,9 @@ package io2.hobbymatch.business.data.remote.dtos
 
 import io2.hobbymatch.business.domain.Venue
 import io2.hobbymatch.events.domain.Location
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class VenueDTO(
     val id: Long,
     val name: String,

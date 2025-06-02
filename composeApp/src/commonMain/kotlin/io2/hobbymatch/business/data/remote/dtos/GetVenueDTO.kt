@@ -4,7 +4,9 @@ import io2.hobbymatch.business.domain.Venue
 import io2.hobbymatch.events.data.remote.dtos.responses.EventInfoDTO
 import io2.hobbymatch.events.data.remote.dtos.responses.toInfoDTO
 import io2.hobbymatch.events.domain.Location
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class GetVenueDTO(
     val id: Long,
     val name: String,
