@@ -7,9 +7,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Venue(
     val id: Long,
-    val name: String? = null,
-    val description: String? = null,
-    val address: String? = null,
+    val name: String,
+    val description: String,
+    val address: String,
     val location: Location,
     val owner: BusinessClient,
     val events: List<Event>

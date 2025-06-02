@@ -7,5 +7,6 @@ data class BusinessClient(
     val id: String,
     val name: String,
     val email: String,
+    val taxId: String,
     val venues: List<Venue> = emptyList()
 )

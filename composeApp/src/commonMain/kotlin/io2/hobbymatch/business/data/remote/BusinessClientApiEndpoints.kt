@@ -1,10 +1,16 @@
 package io2.hobbymatch.business.data.remote
 
 object BusinessClientApiEndpoints {
-    const val BASE_PATH = "business"
+    private const val BCLIENTS_BASE_PATH = "businessclients"
 
-    const val ADD_VENUE = "$BASE_PATH/venue/addVenue"
-    const val GET_BCLIENT = "$BASE_PATH/{clientId}"
-    const val UPDATE_BCLIENT = "$BASE_PATH/{clientId}"
-    const val GET_VENUE = "$BASE_PATH/venue/{venueId}"
+    const val GET_BCLIENT = "$BCLIENTS_BASE_PATH/{clientId}"
+    const val UPDATE_BCLIENT = "$BCLIENTS_BASE_PATH/{clientId}"
+
+    private const val VENUES_BASE_PATH = "venues"
+
+    const val ADD_VENUE = VENUES_BASE_PATH
+    const val GET_ALL_VENUES = VENUES_BASE_PATH
+    const val GET_VENUE = "$VENUES_BASE_PATH/{venueId}"
+    const val DELETE_VENUE = "$VENUES_BASE_PATH/{venueId}"
+    const val UPDATE_VENUE = "$VENUES_BASE_PATH/{venueId}"
 }

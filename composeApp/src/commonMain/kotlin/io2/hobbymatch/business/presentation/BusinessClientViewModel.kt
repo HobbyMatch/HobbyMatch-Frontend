@@ -4,8 +4,8 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import io2.hobbymatch.auth.data.AuthRepository
 import io2.hobbymatch.business.data.BusinessClientRepository
+import io2.hobbymatch.business.data.remote.dtos.CreateVenueDTO
 import io2.hobbymatch.business.domain.BusinessClient
-import io2.hobbymatch.business.domain.CreateVenueDTO
 import io2.hobbymatch.business.domain.Venue
 import io2.hobbymatch.events.domain.Event
 import io2.hobbymatch.events.domain.Location
